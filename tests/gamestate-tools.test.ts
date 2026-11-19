@@ -34,7 +34,7 @@ test('detect-gamemode returns creative mode', async (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  
+
   const mockBot = {
     game: {
       gameMode: 'creative'
@@ -61,7 +61,7 @@ test('detect-gamemode returns survival mode', async (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  
+
   const mockBot = {
     game: {
       gameMode: 'survival'
@@ -88,7 +88,7 @@ test('detect-gamemode returns adventure mode', async (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  
+
   const mockBot = {
     game: {
       gameMode: 'adventure'

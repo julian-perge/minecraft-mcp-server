@@ -278,7 +278,7 @@ test('craft-item crafts successfully when ingredients are available', async (t) 
 
 test('uses real minecraft-data recipes for version 1.21.8', async (t) => {
   const mcData = minecraftData('1.21.8');
-  
+
   t.truthy(mcData.recipes);
   const isValid = mcData.recipes && (Array.isArray(mcData.recipes) || typeof mcData.recipes === 'object');
   t.true(isValid);

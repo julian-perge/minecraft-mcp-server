@@ -57,7 +57,7 @@ test('send-chat calls bot.chat with message', async (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  
+
   const mockBot = {
     chat: sinon.stub()
   } as Partial<mineflayer.Bot>;
@@ -84,7 +84,7 @@ test('read-chat returns no messages when empty', async (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  
+
   const mockBot = {} as Partial<mineflayer.Bot>;
   const getBot = () => mockBot as mineflayer.Bot;
   const messageStore = new MessageStore();
@@ -108,7 +108,7 @@ test('read-chat returns formatted messages', async (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  
+
   const mockBot = {} as Partial<mineflayer.Bot>;
   const getBot = () => mockBot as mineflayer.Bot;
   const messageStore = new MessageStore();
@@ -139,7 +139,7 @@ test('read-chat respects count parameter', async (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  
+
   const mockBot = {} as Partial<mineflayer.Bot>;
   const getBot = () => mockBot as mineflayer.Bot;
   const messageStore = new MessageStore();
@@ -167,7 +167,7 @@ test('read-chat limits count to max messages', async (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  
+
   const mockBot = {} as Partial<mineflayer.Bot>;
   const getBot = () => mockBot as mineflayer.Bot;
   const messageStore = new MessageStore();
