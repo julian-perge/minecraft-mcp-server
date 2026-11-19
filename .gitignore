@@ -1,13 +1,37 @@
-# Dist folder
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Build output
 dist/
 
-# Node.js dependencies
-node_modules/
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
 
-# Log files
+# Logs
 logs/
 *.log
-npm-debug.log*
+
+# Agent workflow scratch
+tasks/
+
+# Secrets and local environment
+.env
+.env.*
+.secrets
+.secrets.*
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
 
 # Process IDs
 pids/
