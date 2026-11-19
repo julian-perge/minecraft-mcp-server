@@ -19,7 +19,7 @@ hooks = [
   { id = "trailing-whitespace", args = ["--markdown-linebreak-ext=md"] },
 ]
 
-# oxfmt, oxlint and the type check run from the versions that package.json pins, as in ~/code/julianperge_profile.
+# oxfmt and oxlint run from the versions that package.json pins, as in ~/code/julianperge_profile. The type check is bun's own checker, so it runs on the installed bun.
 [[repos]]
 repo = "local"
 
@@ -45,7 +45,7 @@ language = "system"
 types = ["ts"]
 pass_filenames = false
 
-# oxlint's jest rules only see tests that import from jest or vitest, so they miss a focused test that imports from bun:test.
+# oxlint's jest plugin, when it is on, misses a focused test that imports from bun:test (a probe on 2026-11-19), so .oxlintrc.json leaves it off and this hook stops focused tests instead.
 [[repos.hooks]]
 id = "no-focused-tests"
 name = "no focused tests"

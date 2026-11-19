@@ -35,7 +35,7 @@ check: lint test build smoke
 lint: (require "prek" "bun")
     prek run --all-files --show-diff-on-failure
 
-# A fixer hook exits 1 when it changes a file, so the second run fails only when a problem is left that no hook can fix.
+# prek fails a run in which a hook changes a file, so the second run fails only when a problem is left that no hook can fix.
 [doc('Run the prek hooks and keep the fixes they make')]
 [group('check')]
 fmt: (require "prek" "bun")
@@ -62,7 +62,7 @@ smoke: (require "node") build
 build: (require "bun")
     bun run build
 
-[doc('Start the server from source, for example: just dev --port 25566')]
+[doc('Build the server and start it in Node, for example: just dev --port 25566')]
 [group('run')]
 dev *args: (require "bun" "node")
     bun run dev "$@"

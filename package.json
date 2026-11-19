@@ -12,8 +12,7 @@
     "dev": "tsc -p tsconfig.build.json && node dist/main.js",
     "test": "bun test",
     "check:types": "bun check",
-    "lint": "oxlint --deny-warnings",
-    "fmt": "oxfmt"
+    "lint": "oxlint --deny-warnings"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
