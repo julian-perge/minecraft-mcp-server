@@ -13,7 +13,7 @@ This repo started as a fork of [yuniko-software/minecraft-mcp-server](https://gi
 | 26.3 | Not yet. It waits for a mineflayer release that supports it. The bot refuses a 26.3 server with a message. |
 | 26.2 | Skipped. |
 
-The bot pings the server before it joins and refuses every version that this table does not mark Supported. 26.1 and 26.1.1 use the same protocol as 26.1.2, so the bot joins them too, but no in-game check ran on them. [docs/verification.md](docs/verification.md) records the in-game check of each version, and [ADR 0003](docs/adr/0003-supported-minecraft-versions.md) says why the list is what it is.
+The bot pings the server before it joins. It joins only a server that uses the protocol of a version that this table marks Supported, and refuses every other server. 26.1 and 26.1.1 use the same protocol as 26.1.2, so the bot joins them too, but no in-game check ran on them. [docs/verification.md](docs/verification.md) records the in-game check of each version, and [ADR 0003](docs/adr/0003-supported-minecraft-versions.md) says why the list is what it is.
 
 ## Requirements
 

@@ -23,7 +23,7 @@ The fork builds, lints and tests with the tools that the owner's other repos use
 | Command | What it does |
 | --- | --- |
 | `just install` | `bun install --frozen-lockfile` |
-| `just check` | `just lint`, `just test`, `just build`, `just smoke` (added in #4) |
+| `just check` | `just lint`, `just test`, `just build`, `just smoke` (added in #12) |
 | `just lint` | prek on every file: builtin hooks, oxfmt, oxlint, `bun check`, `no-focused-tests` |
 | `just test [files]` | `bun test` |
 | `just build` | `bun run build` (`tsc -p tsconfig.build.json`) |

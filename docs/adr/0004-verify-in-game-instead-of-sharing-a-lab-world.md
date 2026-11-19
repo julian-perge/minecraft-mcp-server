@@ -104,7 +104,7 @@ Structure Lab's 26.3 branch writes, so it is ready for 26.3 when the bot is.
 - `run-command` runs whatever the server lets the bot run. The server's
   operator list is the only limit.
 - `verify-structure` reads a file path that the MCP client gives it. The MCP
-  server runs on the client's machine with the client's rights. The reader
-  refuses a relative path, a path that is not a regular file, a file over
-  64 MiB, gzip data that unpacks to more than 256 MiB, and a template over
-  1,000,000 blocks.
+  server runs on the client's machine with the client's rights. The tool
+  refuses a relative path. The reader refuses a path that is not a regular
+  file, a file over 64 MiB, gzip data that unpacks to more than 256 MiB, and a
+  template over 1,000,000 blocks.
