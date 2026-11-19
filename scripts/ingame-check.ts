@@ -541,7 +541,7 @@ function gameChecks(): Check[] {
           expectTool(
             "can-reach",
             { x: 22, y: -60, z: 22, range: 0, timeoutMs: 3000 },
-            /^FAIL: .* is (noPath|partial|timeout), with \d+ steps\.$/,
+            /^FAIL: .* is (noPath|timeout), with \d+ steps\.$/,
           ),
         );
         return `${open} A bedrock box: ${sealed}`;

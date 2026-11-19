@@ -1,5 +1,6 @@
 import type mineflayer from "mineflayer";
-import pathfinderPkg from "mineflayer-pathfinder";
+import pathfinderPkg, { type Movements } from "mineflayer-pathfinder";
+import { setImmediate as nextTurn } from "node:timers/promises";
 import { z } from "zod";
 import { compareBlocks, formatReport, type ExpectedBlock } from "../block-compare.js";
 import { readStructureFile } from "../structure-file.js";
@@ -11,6 +12,16 @@ const MAX_LISTED = 20;
 const MAX_MESSAGES = 50;
 
 const coordinate = z.coerce.number().int();
+
+// A copy of the bot's movements that only walks, jumps and climbs. The default movements also dig through blocks and build pillars, so a path through a wall would count as reachable.
+function walkingMovements(movements: Movements): Movements {
+  return Object.assign(Object.create(Object.getPrototypeOf(movements)) as Movements, movements, {
+    canDig: false,
+    allow1by1towers: false,
+    scafoldingBlocks: [],
+  });
+}
+
 const maxListed = z.coerce
   .number()
   .int()
@@ -31,6 +42,15 @@ export function registerVerificationTools(
         .string()
         .min(1)
         .max(256)
+        // The server disconnects a player that sends a control character or a section sign, so the tool refuses them before it sends anything.
+        .refine(
+          (command) =>
+            ![...command].some((character) => {
+              const code = character.charCodeAt(0);
+              return code < 0x20 || code === 0x7f || code === 0xa7;
+            }),
+          "Use one line, without control characters or the section sign",
+        )
         .describe(
           "The command, with or without the leading slash, for example: time query daytime",
         ),
@@ -138,7 +158,7 @@ export function registerVerificationTools(
 
   factory.registerTool(
     "can-reach",
-    "Check whether the bot can walk to a position, without moving it. Returns the pathfinder's result (success, partial, timeout or noPath) and the length of the path.",
+    "Check whether the bot can walk to a position, without moving it. Only walking, jumping and climbing count, not digging or building. Returns the pathfinder's result (success, timeout or noPath) and the length of the path.",
     {
       x: coordinate,
       y: coordinate,
@@ -160,11 +180,20 @@ export function registerVerificationTools(
     },
     async ({ x, y, z: targetZ, range, timeoutMs }) => {
       const bot = getBot();
-      const result = bot.pathfinder.getPathTo(
-        bot.pathfinder.movements,
+      // getPathTo stops after one slice of about 40 ms and then answers partial, so the tool runs every slice until the search ends. It waits for the event loop between slices to keep the connection alive.
+      const search = bot.pathfinder.getPathFromTo(
+        walkingMovements(bot.pathfinder.movements),
+        bot.entity.position,
         new goals.GoalNear(x, y, targetZ, range),
-        timeoutMs,
+        { timeout: timeoutMs },
       );
+      let result: { status: string; path: unknown[] } = { status: "noPath", path: [] };
+      for (const step of search) {
+        result = step.result;
+        if (result.status === "partial") {
+          await nextTurn();
+        }
+      }
       const target = `(${x}, ${y}, ${targetZ})`;
       const start = bot.entity.position.floored();
       const from = `(${start.x}, ${start.y}, ${start.z})`;

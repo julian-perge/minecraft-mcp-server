@@ -67,6 +67,18 @@ test("run-command says when no message arrived", async () => {
   await tools.close();
 });
 
+test("run-command refuses a command with a line break, which would make the server kick the bot", async () => {
+  const bot = Object.assign(new EventEmitter(), { chat: sinon.stub() });
+  const tools = await toolsFor(bot);
+
+  const result = await tools.call("run-command", { command: "say hi\nop someone" });
+
+  expect(result.isError).toBe(true);
+  expect(textOf(result)).toContain("Use one line");
+  expect(bot.chat.notCalled).toBe(true);
+  await tools.close();
+});
+
 test("run-command refuses a wait over 10 seconds", async () => {
   const tools = await toolsFor({});
 
@@ -152,18 +164,27 @@ test("verify-structure returns the reader's error for a missing file", async () 
   await tools.close();
 });
 
+// The pathfinder's search yields partial after each slice of work and ends with one final status.
+function pathSearch(statuses: string[]) {
+  return sinon.stub().callsFake(function* () {
+    for (const status of statuses) {
+      yield { result: { status, path: [1, 2, 3] } };
+    }
+  });
+}
+
 for (const [status, verdict] of [
   ["success", "PASS"],
-  ["partial", "FAIL"],
   ["timeout", "FAIL"],
   ["noPath", "FAIL"],
 ] as const) {
   test(`can-reach answers ${verdict} for a ${status} path and does not move the bot`, async () => {
-    const getPathTo = sinon.stub().returns({ status, path: [1, 2, 3] });
+    const getPathFromTo = pathSearch([status]);
     const goto = sinon.stub();
+    const movements = { canDig: true, allow1by1towers: true, scafoldingBlocks: [1, 2] };
     const bot = {
       entity: { position: new Vec3(0.5, 64, 0.5) },
-      pathfinder: { movements: {}, getPathTo, goto },
+      pathfinder: { movements, getPathFromTo, goto },
     };
     const tools = await toolsFor(bot);
 
@@ -172,10 +193,53 @@ for (const [status, verdict] of [
     expect(textOf(result)).toBe(
       `${verdict}: the path from (0, 64, 0) to within 2 blocks of (5, 64, 6) is ${status}, with 3 steps.`,
     );
-    const goal = getPathTo.firstCall.args[1];
+    const [, , goal, options] = getPathFromTo.firstCall.args;
     expect([goal.x, goal.y, goal.z, goal.rangeSq]).toStrictEqual([5, 64, 6, 4]);
-    expect(getPathTo.firstCall.args[2]).toBe(1000);
+    expect(options).toStrictEqual({ timeout: 1000 });
     expect(goto.notCalled).toBe(true);
     await tools.close();
   });
 }
+
+test("can-reach runs every slice of the search until it ends", async () => {
+  const getPathFromTo = pathSearch(["partial", "partial", "success"]);
+  const bot = {
+    entity: { position: new Vec3(0.5, 64, 0.5) },
+    pathfinder: { movements: {}, getPathFromTo },
+  };
+  const tools = await toolsFor(bot);
+
+  const result = await tools.call("can-reach", { x: 5, y: 64, z: 6 });
+
+  expect(textOf(result)).toStartWith("PASS:");
+  expect(textOf(result)).toContain("is success");
+  await tools.close();
+});
+
+test("can-reach only walks: it does not dig or build, and keeps the bot's own movements", async () => {
+  const getPathFromTo = pathSearch(["success"]);
+  const movements = {
+    canDig: true,
+    allow1by1towers: true,
+    scafoldingBlocks: [1, 2],
+    maxDropDown: 4,
+  };
+  const bot = {
+    entity: { position: new Vec3(0.5, 64, 0.5) },
+    pathfinder: { movements, getPathFromTo },
+  };
+  const tools = await toolsFor(bot);
+
+  await tools.call("can-reach", { x: 5, y: 64, z: 6 });
+
+  const used = getPathFromTo.firstCall.args[0];
+  expect([
+    used.canDig,
+    used.allow1by1towers,
+    used.scafoldingBlocks,
+    used.maxDropDown,
+  ]).toStrictEqual([false, false, [], 4]);
+  expect(movements.canDig).toBe(true);
+  expect(movements.scafoldingBlocks).toStrictEqual([1, 2]);
+  await tools.close();
+});
