@@ -70,7 +70,8 @@ The useful link is Structure Lab's export. Its datapack places the structure
 on a vanilla server, where ticks run, and `verify-structure` compares the
 placed blocks with the exported NBT. `verify-structure` reads both palette
 spellings, `Name` and `Properties` and the `id` and `properties` that
-Structure Lab's 26.3 branch writes, so it is ready for 26.3 when the bot is.
+Structure Lab's main branch writes for 26.3, so it is ready for 26.3 when the
+bot is.
 
 ## Alternatives Considered
 
@@ -102,7 +103,8 @@ Structure Lab's 26.3 branch writes, so it is ready for 26.3 when the bot is.
   their side: julian-perge/minecraft-agent-skills#95 and
   julian-perge/MinecraftStructureInjector#1.
 - `run-command` runs whatever the server lets the bot run. The server's
-  operator list is the only limit.
+  permissions decide which commands run. The tool refuses only a command
+  over 256 characters or one with a control character or the section sign.
 - `verify-structure` reads a file path that the MCP client gives it. The MCP
   server runs on the client's machine with the client's rights. The tool
   refuses a relative path. The reader refuses a path that is not a regular

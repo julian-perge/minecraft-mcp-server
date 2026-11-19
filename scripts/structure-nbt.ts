@@ -7,7 +7,7 @@ export interface FixtureBlock {
   properties?: Record<string, string>;
 }
 
-// Writes a structure template the way the game saves one. spelling "26.3" uses id and properties, the keys that Structure Lab's 26.3 branch writes.
+// Builds the bytes of a structure template file, gzipped by default as the game saves it. With spelling "26.3", palette entries use id and properties, as Structure Lab's main branch writes them.
 export function structureNbt(
   size: [number, number, number],
   blocks: FixtureBlock[],

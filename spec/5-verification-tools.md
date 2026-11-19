@@ -19,7 +19,7 @@ The research for #5 is in ADR 0004. In short:
 
 - **Build verification tools, not a shared lab world.** ADR 0004 records the options and the answer.
 - **`run-command`**: sends one command as the bot and returns the command's replies and any chat that arrive within a wait time (default 1000 ms, at most 10000 ms). The server's permissions decide what the bot may run. Most commands need the bot to be an operator.
-- **`check-blocks`**: takes up to 1000 expected blocks, each with a position, a block name and optional properties, and returns how many match, and each mismatch and each position in a chunk that is not loaded.
+- **`check-blocks`**: takes up to 1000 expected blocks, each with a position, a block name and optional properties, and returns how many match, then lists up to `maxListed` mismatches, positions in chunks that are not loaded, and positions outside the world height.
 - **`verify-structure`**: takes the path of a structure template `.nbt` file and the origin where it was placed, and compares every block in the file with the world, in the same format as `check-blocks`. It reads both palette spellings: `Name` and `Properties` (1.21.11, 26.1.2) and `id` and `properties` (26.3, as Structure Lab's main branch writes them). It skips `minecraft:structure_void`. It refuses a relative path, a path that is not a regular file, a file over 64 MiB, gzip data that unpacks to more than 256 MiB, a template with several palettes, and a template over 1,000,000 blocks.
 - **`can-reach`**: asks the pathfinder for a path to a position, without moving, and returns the result (`success`, `timeout` or `noPath`) and the path length. It runs the whole search, so `partial` never comes back.
 - **One comparison module** serves `check-blocks` and `verify-structure`, so both report in the same form.
@@ -35,7 +35,7 @@ No new recipe. `just check` covers the unit tests. `just ingame <version>` cover
 - `src/tools/verification-tools.ts`: the four tools.
 - `src/block-compare.ts`: the comparison of expected blocks with the world.
 - `src/structure-file.ts`: the reader of structure template files.
-- `tests/verification-tools.test.ts`, `tests/block-compare.test.ts`, `tests/structure-file.test.ts`, with fixture `.nbt` data that `scripts/structure-nbt.ts` writes into a temporary folder during the test.
+- `tests/verification-tools.test.ts`, `tests/block-compare.test.ts`, `tests/structure-file.test.ts`, with fixture `.nbt` bytes from `scripts/structure-nbt.ts`, which the tests parse in memory or write to a temporary folder.
 - `scripts/ingame-check.ts`: checks for the four tools.
 - `docs/adr/0004-verify-in-game-instead-of-sharing-a-lab-world.md`, `docs/verify-in-game.md`, README.md.
 

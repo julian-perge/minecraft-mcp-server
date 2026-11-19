@@ -80,7 +80,7 @@ export function registerVerificationTools(
       const bot = getBot();
       const text = command.startsWith("/") ? command : `/${command}`;
       const messages: string[] = [];
-      // Command replies arrive as system messages, and chat during the wait comes along, because a /say echo is a chat message too. The action bar (game_info) also uses this event but is never a reply, so it is left out.
+      // The messagestr event carries command replies and chat. The tool keeps chat, because the echo of /say arrives as chat. The action bar (game_info) also uses this event but is never a reply, so it is left out.
       const collect = (message: string, position: string) => {
         if (position !== "game_info") {
           messages.push(message);
@@ -198,7 +198,7 @@ export function registerVerificationTools(
     },
     async ({ x, y, z: targetZ, range, timeoutMs }) => {
       const bot = getBot();
-      // getPathTo stops after one slice of about 40 ms and then answers partial, so the tool runs every slice until the search ends. It waits for the event loop between slices to keep the connection alive.
+      // mineflayer-pathfinder's getPathTo returns partial after the first slice of the search (about 40 ms), so the tool steps through getPathFromTo until the search ends. It waits for the event loop between slices to keep the connection alive.
       const search = bot.pathfinder.getPathFromTo(
         walkingMovements(bot.pathfinder.movements),
         bot.entity.position,

@@ -60,7 +60,7 @@ function isGzip(data: Buffer): boolean {
   return data.length >= 2 && data[0] === 0x1f && data[1] === 0x8b;
 }
 
-// Up to 26.1.2 a palette entry says Name and Properties. Structure Lab's 26.3 branch writes id and properties, because 26.3 renamed them, so the reader takes either spelling.
+// Up to 26.1.2 a palette entry says Name and Properties. Structure Lab's main branch, which targets 26.3, writes id and properties, because 26.3 renamed them, so the reader takes either spelling.
 export async function parseStructure(
   data: Buffer,
   maxNbtBytes = MAX_STRUCTURE_NBT_BYTES,

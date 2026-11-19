@@ -22,8 +22,9 @@ The bot is mineflayer. On 2026-11-19 the latest releases were mineflayer
   `26.1.2` to the `26.1` data.
 - minecraft-data knows the protocol number of 26.3 (777) but has no data for
   it. Support for 26.3 exists only in open pull requests:
-  PrismarineJS/mineflayer#4213, PrismarineJS/node-minecraft-protocol#1532 and
-  #1553, and PrismarineJS/minecraft-data#1345 and #1348.
+  PrismarineJS/mineflayer#4124 and #4206, PrismarineJS/node-minecraft-protocol#1532
+  and #1553, and PrismarineJS/minecraft-data#1345 and #1348.
+  PrismarineJS/mineflayer#4213 is the open issue that tracks it.
 
 Before this decision the bot joined any server and named 1.21.11 only in an
 error message. On a version that mineflayer does not support, the join fails

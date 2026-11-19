@@ -94,9 +94,7 @@ export function registerFurnaceTools(factory: ToolFactory, getBot: () => minefla
       const cleanup = () => {
         try {
           furnace.close();
-        } catch {
-          // ignore
-        }
+        } catch {}
       };
 
       try {
