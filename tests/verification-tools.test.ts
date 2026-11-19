@@ -216,7 +216,7 @@ test("can-reach runs every slice of the search until it ends", async () => {
   await tools.close();
 });
 
-test("can-reach only walks: it does not dig or build, and keeps the bot's own movements", async () => {
+test("can-reach does not dig or build, and keeps the bot's own movements", async () => {
   const getPathFromTo = pathSearch(["success"]);
   const movements = {
     canDig: true,
