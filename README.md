@@ -121,4 +121,4 @@ Entities, chat and game state:
 
 ## Development
 
-`just` lists the recipes. `just check` runs the lint, the type check, the unit tests, the build and a start of the built server in Node, and proves a change. `just ingame <version>` runs every tool against a real server of a supported version, and the refusal check for 26.3, see [docs/verification.md](docs/verification.md). [AGENTS.md](AGENTS.md) lists the commands and the rules for this repo, and [CONTRIBUTING.md](CONTRIBUTING.md) says how a change gets in.
+`just` lists the recipes. `just check` runs the lint, the type check, the unit tests, the build and a start of the built server in Node, and proves a change. `just ingame <version>` runs every tool against a real server of a supported version, and the refusal check for 26.3. See [docs/verification.md](docs/verification.md). [AGENTS.md](AGENTS.md) lists the commands and the rules for this repo, and [CONTRIBUTING.md](CONTRIBUTING.md) says how a change gets in.
