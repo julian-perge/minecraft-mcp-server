@@ -76,3 +76,7 @@ export function isCommandErrorLine(line: string): boolean {
     logMessage(line),
   );
 }
+
+export function isVersionName(version: string): boolean {
+  return /^\d+(\.\d+)+(-[a-z]+(-\d+)?)?$/.test(version);
+}

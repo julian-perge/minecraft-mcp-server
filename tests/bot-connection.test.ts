@@ -281,3 +281,31 @@ test("checkConnectionAndReconnect returns the refusal as soon as the gate refuse
   expect(result.message).toContain("26.3 (protocol 777), which is not supported.");
   expect(Date.now() - started).toBeLessThan(2000);
 });
+
+test("connect gives the ping a 10 second timeout", async () => {
+  const { connection, ping } = gateConnection(
+    Promise.resolve({ version: { name: "1.21.11", protocol: 774 } }),
+  );
+
+  await connection.connect();
+
+  expect(ping.firstCall.args[0]).toStrictEqual({
+    host: "localhost",
+    port: 25565,
+    closeTimeout: 10_000,
+  });
+});
+
+test("a server that closes the connection before spawn leaves the state disconnected", async () => {
+  const { connection, createBot } = gateConnection(
+    Promise.resolve({ version: { name: "1.21.11", protocol: 774 } }),
+  );
+  await connection.connect();
+  const bot = createBot.firstCall.returnValue as EventEmitter;
+  expect(connection.getState()).toBe("connecting");
+
+  bot.emit("end", "You are not whitelisted on this server!");
+
+  expect(connection.getState()).toBe("disconnected");
+  expect(connection.getBot()).toBe(null);
+});

@@ -6,6 +6,7 @@ import {
   isJoinedLine,
   isTestFailedLine,
   isTestPassedLine,
+  isVersionName,
   javaEnvName,
   logMessage,
   parseJavaMajor,
@@ -110,5 +111,19 @@ describe("log line matchers", () => {
     expect(isCommandErrorLine(line("No player was found"))).toBe(true);
     expect(isCommandErrorLine(line("...ock 1 2 3 minecraft:nope<--[HERE]"))).toBe(true);
     expect(isCommandErrorLine(line("Gave 9 [Oak Planks] to CheckBot"))).toBe(false);
+  });
+});
+
+describe("isVersionName", () => {
+  test("accepts release, release candidate and snapshot names", () => {
+    for (const name of ["1.21.11", "26.1.2", "26.3", "26.3-rc-3", "26.4-snapshot-6"]) {
+      expect(isVersionName(name)).toBe(true);
+    }
+  });
+
+  test("refuses a name that could leave the cache folder", () => {
+    for (const name of ["../x", "26.1/../../etc", "", "latest", "/tmp"]) {
+      expect(isVersionName(name)).toBe(false);
+    }
   });
 });

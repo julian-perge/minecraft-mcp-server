@@ -18,9 +18,15 @@ interface ConnectionCallbacks {
   onChatMessage: (username: string, message: string) => void;
 }
 
+export const PING_TIMEOUT_MS = 10_000;
+
 // Tests replace these two to run the connection without a Minecraft server.
 export interface ConnectionDeps {
-  ping: (options: { host: string; port: number }) => Promise<OldPingResult | NewPingResult>;
+  ping: (options: {
+    host: string;
+    port: number;
+    closeTimeout: number;
+  }) => Promise<OldPingResult | NewPingResult>;
   createBot: typeof mineflayer.createBot;
 }
 
@@ -81,7 +87,12 @@ export class BotConnection {
 
     let serverVersion: { name: string; protocol: number };
     try {
-      const result = await this.deps.ping({ host: this.config.host, port: this.config.port });
+      // minecraft-protocol waits 120 seconds for a host that does not answer, and every tool call says "connecting" meanwhile, so the ping gives up after 10.
+      const result = await this.deps.ping({
+        host: this.config.host,
+        port: this.config.port,
+        closeTimeout: PING_TIMEOUT_MS,
+      });
       // A server older than 1.7 answers the ping with a version string and no protocol number.
       serverVersion =
         typeof result.version === "object"
@@ -159,7 +170,8 @@ export class BotConnection {
     bot.on("end", (reason) => {
       this.callbacks.onLog("info", `Bot disconnected: ${this.formatError(reason)}`);
 
-      if (this.state === "connected") {
+      // A server can close the connection after the ping and before spawn, for example for a whitelist or a ban. The state then leaves "connecting" too, so the next tool call tries again.
+      if (this.state === "connected" || this.state === "connecting") {
         this.state = "disconnected";
       }
 

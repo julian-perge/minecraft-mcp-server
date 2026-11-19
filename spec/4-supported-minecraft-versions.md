@@ -30,7 +30,7 @@ The bot names the Minecraft versions it supports, refuses every other version wi
 | `just ingame <version>` | Run the in-game check against one version. |
 | `just ingame-all` | Run it for 1.21.11 and 26.1.2, then the refusal check for 26.3. |
 | `just server-jar <version>` | Download and check one server jar. |
-| `just check` | Unchanged. It runs no server. |
+| `just check` | Also starts the built server in Node with `--help` (`just smoke`), because bun accepted an import that Node refused. It runs no Minecraft server. |
 
 ## Project structure
 

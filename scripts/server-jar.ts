@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { sha1Hex, sha1Mismatch } from "./ingame-lib.js";
+import { isVersionName, sha1Hex, sha1Mismatch } from "./ingame-lib.js";
 
 const MANIFEST_URL = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
 
@@ -58,6 +58,10 @@ export async function resolveServerJar(
   version: string,
   cacheDir = serverCacheDir(),
 ): Promise<ServerJar> {
+  // The version names a folder in the cache, so a name such as ../x must not reach mkdir.
+  if (!isVersionName(version)) {
+    throw new Error(`"${version}" is not a Minecraft version name, such as 1.21.11 or 26.1.2.`);
+  }
   const versionDir = join(cacheDir, version);
   const versionJsonPath = join(versionDir, "version.json");
   const jarPath = join(versionDir, "server.jar");

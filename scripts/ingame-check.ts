@@ -494,6 +494,8 @@ function refusalChecks(): Check[] {
 
 // After SIGINT or SIGTERM the cleanup stops both servers, so every check still running fails, and those failures say nothing about the bot.
 let interrupted = false;
+// The signal handler and the end of the script both exit, so both use the signal's code once a signal came.
+let signalExitCode: number | null = null;
 
 function record(tool: string, ok: boolean, detail: string): void {
   if (interrupted) return;
@@ -605,6 +607,7 @@ for (const [signal, code] of [
 ] as const) {
   process.on(signal, () => {
     interrupted = true;
+    signalExitCode = code;
     console.error(`${signal}: stopping the servers`);
     void cleanup().finally(() => process.exit(code));
   });
@@ -640,7 +643,7 @@ if (args.report) {
   const report = {
     version: args.version,
     date: new Date().toISOString(),
-    mode: args["expect-refusal"] ? "expect-refusal" : "game",
+    mode: args["expect-refusal"] ? "refusal" : "game",
     mineflayer: mineflayer.version,
     node,
     java: javaVersionText,
@@ -650,4 +653,4 @@ if (args.report) {
   await writeFile(args.report, `${JSON.stringify(report, null, 2)}\n`);
 }
 
-process.exit(passed ? 0 : 1);
+process.exit(signalExitCode ?? (passed ? 0 : 1));
