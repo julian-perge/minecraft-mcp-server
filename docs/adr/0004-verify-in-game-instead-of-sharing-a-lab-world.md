@@ -35,8 +35,10 @@ Facts from Structure Lab's source, on 2026-11-19:
   weather, mob spawns, random ticks and command blocks (`LabSession.java`).
 - The HTTP bridge starts on client setup and serves only an open singleplayer
   world (`LabCapture.java`, `LabBridge.java`).
-- `neoforge.mods.toml` declares `side="BOTH"`, and the mod registers a block,
-  an item and a block entity type (`StructureLab.java`).
+- The mod registers a block (`structurelab:view_pad`), its block item and a
+  block entity type (`StructureLab.java`). `neoforge.mods.toml` sets
+  `side="BOTH"` only on its dependencies on NeoForge and Minecraft, so the
+  client requirement comes from the registered entries, not from that line.
 - Capture and the bridge's `command` operation act on the first player in the
   player list (`LabSession.java`, `LabTestOps.java`).
 
