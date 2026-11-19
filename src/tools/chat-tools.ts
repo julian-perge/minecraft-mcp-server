@@ -23,7 +23,7 @@ export function registerChatTools(
 
   factory.registerTool(
     "read-chat",
-    "Get recent chat messages from players",
+    "Get recent chat messages, from players and from the server's /say",
     {
       count: z
         .number()

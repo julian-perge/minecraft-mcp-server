@@ -46,7 +46,9 @@ test("registerChatTools registers read-chat tool", () => {
   const readChatCall = toolCalls.find((call) => call.args[0] === "read-chat");
 
   expect(readChatCall).toBeTruthy();
-  expect(readChatCall!.args[1].description).toBe("Get recent chat messages from players");
+  expect(readChatCall!.args[1].description).toBe(
+    "Get recent chat messages, from players and from the server's /say",
+  );
 });
 
 test("send-chat calls bot.chat with message", async () => {

@@ -8,7 +8,7 @@ The bot names the Minecraft versions it supports, refuses every other version wi
 
 ## Facts on 2026-11-19
 
-- mineflayer 4.39.0 (the latest release) lists `1.21.11` and `26.1` in `lib/version.js` `testedVersions`. minecraft-protocol 1.68.0 lists the same.
+- mineflayer 4.39.0 (the latest release) lists `1.21.11` and `26.1` in `lib/version.js` `testedVersions`. minecraft-protocol 1.68.0 lists the same in `src/version.js` `supportedVersions`.
 - minecraft-data 3.119.0 resolves `1.21.11` to protocol 774 and `26.1.2` to the `26.1` data with protocol 775. It knows the protocol number of 26.3 (777) but has no data for it, so `minecraftData("26.3")` is null.
 - 26.3 support exists only in open pull requests: PrismarineJS/mineflayer#4213, PrismarineJS/node-minecraft-protocol#1532 and #1553, PrismarineJS/minecraft-data#1345 and #1348.
 - Mojang's 1.21.11 server needs Java 21. The 26.1.2 and 26.3 servers need Java 25 (piston-meta `javaVersion`).
@@ -34,7 +34,7 @@ The bot names the Minecraft versions it supports, refuses every other version wi
 
 ## Project structure
 
-- `src/minecraft-versions.ts`: the list, and `resolveServerVersion(protocol)`.
+- `src/minecraft-versions.ts`: the list, and `checkServerVersion(server)`.
 - `src/bot-connection.ts`: pings, gates, then calls `mineflayer.createBot` with the exact version.
 - `scripts/ingame-check.ts`, `scripts/server-jar.ts`: the in-game check and the jar download.
 - `docs/adr/0003-supported-minecraft-versions.md`, `docs/verification.md`.

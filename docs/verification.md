@@ -1,6 +1,6 @@
 # Verification
 
-This file records the last in-game check of each Minecraft version in `src/minecraft-versions.ts`. A version is supported only after `just ingame <version>` passed against a vanilla server of that version. See `docs/adr/0003-supported-minecraft-versions.md`.
+This file records the last in-game check of each supported version in `src/minecraft-versions.ts`, and of 26.3, which the bot refuses. 26.2 is skipped and has no check. A version is supported only after `just ingame <version>` passed against a vanilla server of that version. See `docs/adr/0003-supported-minecraft-versions.md`.
 
 ## How to run
 
