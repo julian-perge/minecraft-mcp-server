@@ -1,6 +1,6 @@
 # Issue tracker: GitHub
 
-Tasks for this repo are GitHub issues. Read them with the `agent-skills` verbs, which [Workflow](workflow.md) lists, and write them with the `gh` CLI. Pass `--repo julian-perge/minecraft-mcp-server` on every write: in a fork with an `upstream` remote, a bare `gh` can target the parent repo.
+Tasks for this repo are GitHub issues. Read them with the `agent-skills` verbs, which [Workflow](workflow.md) lists, and write them with the `gh` CLI. Pass `--repo julian-perge/minecraft-mcp-server` on every write: this repo is a fork, and a bare `gh` can target the parent repo (ADR 0001).
 
 ## Conventions
 

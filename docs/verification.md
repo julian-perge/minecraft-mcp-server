@@ -1,6 +1,6 @@
 # Verification
 
-This file records the last in-game check of each Minecraft version in `src/minecraft-versions.ts`. A version is supported only after `just ingame <version>` passed against a vanilla server of that version. See `docs/adr/0003-supported-minecraft-versions.md`.
+This file records the last in-game check of each supported version in `src/minecraft-versions.ts`, and of 26.3, which the bot refuses. 26.2 is skipped and has no check. A version is supported only after `just ingame <version>` passed against a vanilla server of that version. See `docs/adr/0003-supported-minecraft-versions.md`.
 
 ## How to run
 
@@ -18,11 +18,11 @@ The 1.21.11 server needs Java 21 or later, and the 26.1.2 and 26.3 servers need 
 
 ## Results
 
-| Version | Check | Result | Date | mineflayer | Node | Java |
+| Version | Check | Result | Run at | mineflayer | Node | Java |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1.21.11 | every tool | 28 of 28 passed | 2026-11-19 | 4.39.0 | v26.13.1 | 25.0.4 |
-| 26.1.2 | every tool | 28 of 28 passed | 2026-11-19 | 4.39.0 | v26.13.1 | 25.0.4 |
-| 26.3 | refusal | 5 of 5 passed | 2026-11-19 | 4.39.0 | v26.13.1 | 25.0.4 |
+| 1.21.11 | every tool | 28 of 28 passed | 2026-11-19 22:23 UTC | 4.39.0 | v26.13.1 | 25.0.4 |
+| 26.1.2 | every tool | 28 of 28 passed | 2026-11-19 22:23 UTC | 4.39.0 | v26.13.1 | 25.0.4 |
+| 26.3 | refusal | 5 of 5 passed | 2026-11-19 22:24 UTC | 4.39.0 | v26.13.1 | 25.0.4 |
 
 - 1.21.11 and 26.1.2: every one of the 26 tools that `src/main.ts` registered on that date passed at least one check. `detect-gamemode` and `find-blocks` ran twice.
 - 26.3: the bot refused the server before it joined, and each tool call returned the refusal message that names 1.21.11 and 26.1.2. 26.3 stays deferred until a mineflayer release supports it.

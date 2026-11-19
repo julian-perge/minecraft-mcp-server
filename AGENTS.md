@@ -22,18 +22,21 @@ a recipe stops with a message when a tool it needs is missing.
   runs them twice and keeps their fixes.
 - `just test` runs the unit tests. `just test tests/chat-tools.test.ts`
   runs one file.
-- `just dev` builds the server and starts it in Node. Arguments pass through, for
-  example `just dev --port 25566`.
+- `just dev` builds the server and starts it in Node. Arguments pass
+  through, for example `just dev --port 25566`.
 
 ## Setup
 
-- Install bun 1.4.4 or later, Node 22 or later, `just` and `prek`. bun is
-  the only package manager and runs the tests and scripts. The server itself
-  runs on Node. See `docs/adr/0002-bun-is-the-only-package-manager.md`.
+- Install bun 1.4.4 or later, Node 22 or later, `just` and `prek` 0.5.0 or
+  later. bun is the only package manager and runs the tests and scripts. The
+  server itself runs on Node. See
+  `docs/adr/0002-bun-is-the-only-package-manager.md`.
 - The in-game check also needs Java 21 or later for 1.21.11, and Java 25 or
   later for 26.1.2 and 26.3.
 - `just install` installs the dependencies from `bun.lock`.
 - `prek install` makes the hooks run on each commit.
+- The workflow needs the `agent-skills` CLI. It is in the `bin/` folder of
+  julian-perge/agent-skills. Put that folder on `PATH`.
 
 ## Minecraft versions
 

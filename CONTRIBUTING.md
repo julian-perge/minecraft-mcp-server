@@ -4,14 +4,14 @@ Work on this repo goes through GitHub issues on julian-perge/minecraft-mcp-serve
 
 ## Set up
 
-Install bun 1.4.4 or later, Node 22 or later, [just](https://just.systems) and [prek](https://prek.j178.dev). Then:
+Install bun 1.4.4 or later, Node 22 or later, [just](https://just.systems) and [prek](https://prek.j178.dev) 0.5.0 or later. Then:
 
 ```bash
 just install
 prek install
 ```
 
-`prek install` makes the hooks in `prek.toml` run on each commit: oxfmt, oxlint, `bun check` and the file checks.
+`prek install` makes the hooks in `prek.toml` run on each commit: oxfmt, oxlint, `bun check`, a check for focused tests (`.only`) and the file checks.
 
 ## Make a change
 

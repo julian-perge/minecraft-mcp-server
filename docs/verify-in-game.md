@@ -1,6 +1,6 @@
 # Verify a build in game
 
-The bot checks the result of a datapack, a structure or a server change in a running game. Each check below is a sequence of tool calls that an agent makes through this MCP server. Every verification tool answers `PASS` or `FAIL` on its first line.
+The bot checks the result of a datapack, a structure or a server change in a running game. Each check below is a sequence of tool calls that an agent makes through this MCP server. `check-blocks`, `verify-structure` and `can-reach` answer `PASS` or `FAIL` on their first line. `run-command` lists the messages that arrive after the command.
 
 ADR 0004 says why the checks run on a vanilla server and not in a Structure Lab world.
 
@@ -45,9 +45,9 @@ Structure Lab's `export_structure` tool returns a clean `.nbt` file, a vanilla d
    { "path": "/absolute/path/to/house.nbt", "x": 100, "y": 64, "z": 100 }
    ```
 
-   The answer lists each block that differs, with the expected and the found state. A template with several palettes, such as a vanilla shipwreck, is refused, because `/place template` picks one of them at random.
+   The answer lists up to 20 blocks that differ, or up to `maxListed` (at most 200), with the expected state and the found state of the same properties. A template with several palettes, such as a vanilla shipwreck, is refused, because `/place template` picks one of them at random.
 
-6. `can-reach` to each room that a player should reach, for example `{"x": 104, "y": 64, "z": 103}`. `can-reach` asks the pathfinder for a path and does not move the bot. The pathfinder opens fence gates but not doors, so give the doorway as the target, or open the doors in the game first.
+6. `can-reach` to each room that a player should reach, for example `{"x": 104, "y": 64, "z": 103}`. `can-reach` asks the pathfinder for a path and does not move the bot. `can-reach` does not open doors or fence gates, and from reading mineflayer-pathfinder's movement code it does not walk through one that is open either. Give a target on the near side of the doorway.
 
 ## A WorldEdit paste
 

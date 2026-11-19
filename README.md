@@ -13,13 +13,14 @@ This repo started as a fork of [yuniko-software/minecraft-mcp-server](https://gi
 | 26.3 | Not yet. It waits for a mineflayer release that supports it. The bot refuses a 26.3 server with a message. |
 | 26.2 | Skipped. |
 
-The bot pings the server before it joins and refuses any version that is not on this list. [docs/verification.md](docs/verification.md) records the in-game check of each version, and [ADR 0003](docs/adr/0003-supported-minecraft-versions.md) says why the list is what it is.
+The bot pings the server before it joins. It joins only a server that uses the protocol of a version that this table marks Supported, and refuses every other server. 26.1 and 26.1.1 use the same protocol as 26.1.2, so the bot joins them too, but no in-game check ran on them. [docs/verification.md](docs/verification.md) records the in-game check of each version, and [ADR 0003](docs/adr/0003-supported-minecraft-versions.md) says why the list is what it is.
 
 ## Requirements
 
 - [bun](https://bun.sh) 1.4.4 or later, to install and build. bun is the only package manager, see [ADR 0002](docs/adr/0002-bun-is-the-only-package-manager.md).
 - Node 22 or later. The server runs on Node.
 - [just](https://just.systems), to run the recipes.
+- [prek](https://prek.j178.dev) 0.5.0 or later, for the lint in `just check`.
 - A Minecraft Java server with `online-mode=false` in `server.properties`. The bot joins without a Microsoft account, so a server in online mode refuses it.
 
 ## Install
@@ -115,9 +116,9 @@ Entities, chat and game state:
 
 - `find-entity`: find the nearest entity of a type.
 - `send-chat`: send a chat message.
-- `read-chat`: get the recent chat messages from players.
+- `read-chat`: get the recent chat messages, from players and from the server's `/say`.
 - `detect-gamemode`: get the bot's game mode.
 
 ## Development
 
-`just` lists the recipes. `just check` runs the lint, the type check, the unit tests and the build, and proves a change. [AGENTS.md](AGENTS.md) lists the commands and the rules for this repo, and [CONTRIBUTING.md](CONTRIBUTING.md) says how a change gets in.
+`just` lists the recipes. `just check` runs the lint, the type check, the unit tests, the build and a start of the built server in Node, and proves a change. `just ingame <version>` runs every tool against a real server, see [docs/verification.md](docs/verification.md). [AGENTS.md](AGENTS.md) lists the commands and the rules for this repo, and [CONTRIBUTING.md](CONTRIBUTING.md) says how a change gets in.
