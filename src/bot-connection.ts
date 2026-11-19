@@ -2,8 +2,8 @@ import mineflayer from "mineflayer";
 import pathfinderPkg from "mineflayer-pathfinder";
 const { pathfinder, Movements } = pathfinderPkg;
 import minecraftData from "minecraft-data";
-
-const SUPPORTED_MINECRAFT_VERSION = "1.21.11";
+import minecraftProtocol, { type NewPingResult, type OldPingResult } from "minecraft-protocol";
+import { checkServerVersion, supportedVersionNames } from "./minecraft-versions.js";
 
 type ConnectionState = "connected" | "connecting" | "disconnected";
 
@@ -18,6 +18,24 @@ interface ConnectionCallbacks {
   onChatMessage: (username: string, message: string) => void;
 }
 
+export const PING_TIMEOUT_MS = 10_000;
+
+// Tests replace these two to run the connection without a Minecraft server.
+export interface ConnectionDeps {
+  ping: (options: {
+    host: string;
+    port: number;
+    closeTimeout: number;
+  }) => Promise<OldPingResult | NewPingResult>;
+  createBot: typeof mineflayer.createBot;
+}
+
+// minecraft-protocol is CommonJS, and Node cannot import its ping by name, so it comes from the default export.
+const defaultDeps: ConnectionDeps = {
+  ping: minecraftProtocol.ping,
+  createBot: mineflayer.createBot,
+};
+
 export class BotConnection {
   private bot: mineflayer.Bot | null = null;
   private state: ConnectionState = "disconnected";
@@ -26,11 +44,19 @@ export class BotConnection {
   private isReconnecting = false;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly reconnectDelayMs: number;
+  private readonly deps: ConnectionDeps;
+  private refusal: string | null = null;
 
-  constructor(config: BotConfig, callbacks: ConnectionCallbacks, reconnectDelayMs = 2000) {
+  constructor(
+    config: BotConfig,
+    callbacks: ConnectionCallbacks,
+    reconnectDelayMs = 2000,
+    deps: Partial<ConnectionDeps> = {},
+  ) {
     this.config = config;
     this.callbacks = callbacks;
     this.reconnectDelayMs = reconnectDelayMs;
+    this.deps = { ...defaultDeps, ...deps };
   }
 
   getBot(): mineflayer.Bot | null {
@@ -49,18 +75,53 @@ export class BotConnection {
     return this.state === "connected";
   }
 
-  connect(): void {
-    const botOptions = {
+  getRefusal(): string | null {
+    return this.refusal;
+  }
+
+  // The bot pings the server first and joins only a version on the supported list, because mineflayer fails on other versions without naming the cause.
+  async connect(): Promise<void> {
+    this.state = "connecting";
+    this.isReconnecting = false;
+    this.refusal = null;
+
+    let serverVersion: { name: string; protocol: number };
+    try {
+      // minecraft-protocol waits 120 seconds for a host that does not answer, and every tool call says "connecting" meanwhile, so the ping gives up after 10.
+      const result = await this.deps.ping({
+        host: this.config.host,
+        port: this.config.port,
+        closeTimeout: PING_TIMEOUT_MS,
+      });
+      // A server older than 1.7 answers the ping with a version string and no protocol number.
+      serverVersion =
+        typeof result.version === "object"
+          ? result.version
+          : { name: String(result.version), protocol: -1 };
+    } catch (err) {
+      this.callbacks.onLog(
+        "error",
+        `Cannot reach the Minecraft server at ${this.config.host}:${this.config.port}: ${this.formatError(err)}`,
+      );
+      this.state = "disconnected";
+      return;
+    }
+
+    const check = checkServerVersion(serverVersion);
+    if (!check.supported) {
+      this.refusal = check.message;
+      this.callbacks.onLog("error", check.message);
+      this.state = "disconnected";
+      return;
+    }
+
+    this.bot = this.deps.createBot({
       host: this.config.host,
       port: this.config.port,
       username: this.config.username,
+      version: check.version,
       plugins: { pathfinder },
-    };
-
-    this.bot = mineflayer.createBot(botOptions);
-    this.state = "connecting";
-    this.isReconnecting = false;
-
+    });
     this.registerEventHandlers(this.bot);
   }
 
@@ -109,7 +170,8 @@ export class BotConnection {
     bot.on("end", (reason) => {
       this.callbacks.onLog("info", `Bot disconnected: ${this.formatError(reason)}`);
 
-      if (this.state === "connected") {
+      // A server can close the connection after the ping and before spawn, for example for a whitelist or a ban. The state then leaves "connecting" too, so the next tool call tries again.
+      if (this.state === "connected" || this.state === "connecting") {
         this.state = "disconnected";
       }
 
@@ -156,7 +218,7 @@ export class BotConnection {
       }
 
       this.callbacks.onLog("info", "Creating new bot instance...");
-      this.connect();
+      void this.connect();
     }, this.reconnectDelayMs);
   }
 
@@ -174,6 +236,9 @@ export class BotConnection {
         if (this.state === "connected") {
           return { connected: true };
         }
+        if (this.state === "disconnected" && this.refusal) {
+          return { connected: false, message: this.refusal };
+        }
         await new Promise((resolve) => setTimeout(resolve, pollInterval));
       }
 
@@ -182,7 +247,7 @@ export class BotConnection {
         `Please ensure:\n` +
         `1. Minecraft server is running on ${this.config.host}:${this.config.port}\n` +
         `2. Server is accessible from this machine\n` +
-        `3. Server version is compatible (latest supported: ${SUPPORTED_MINECRAFT_VERSION})\n\n` +
+        `3. Server version is one of: ${supportedVersionNames()}\n\n` +
         `For setup instructions, visit: https://github.com/julian-perge/minecraft-mcp-server`;
 
       return { connected: false, message: errorMessage };

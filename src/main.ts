@@ -37,7 +37,7 @@ async function main() {
     onChatMessage: (username, message) => messageStore.addMessage(username, message),
   });
 
-  connection.connect();
+  void connection.connect();
 
   const server = new McpServer({
     name: "minecraft-mcp-server",

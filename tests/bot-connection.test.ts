@@ -1,6 +1,7 @@
 import { test, expect } from "bun:test";
 import sinon from "sinon";
-import { BotConnection } from "../src/bot-connection.js";
+import { EventEmitter } from "events";
+import { BotConnection, type ConnectionDeps } from "../src/bot-connection.js";
 
 test("constructor initializes with correct state", () => {
   const config = { host: "localhost", port: 25565, username: "TestBot" };
@@ -182,4 +183,129 @@ test("cleanup does not throw when no bot exists", () => {
   expect(() => {
     connection.cleanup();
   }).not.toThrow();
+});
+
+const gateConfig = { host: "localhost", port: 25565, username: "TestBot" };
+
+function gateConnection(pingResult: Promise<unknown>, reconnectDelayMs = 10) {
+  const callbacks = { onLog: sinon.stub(), onChatMessage: sinon.stub() };
+  const createBot = sinon.stub().callsFake(() => new EventEmitter());
+  const ping = sinon.stub().returns(pingResult);
+  const connection = new BotConnection(gateConfig, callbacks, reconnectDelayMs, {
+    ping: ping as unknown as ConnectionDeps["ping"],
+    createBot: createBot as unknown as ConnectionDeps["createBot"],
+  });
+  return { connection, callbacks, createBot, ping };
+}
+
+test("connect joins a 1.21.11 server with that exact version", async () => {
+  const { connection, createBot } = gateConnection(
+    Promise.resolve({ version: { name: "1.21.11", protocol: 774 } }),
+  );
+
+  await connection.connect();
+
+  expect(createBot.calledOnce).toBe(true);
+  expect(createBot.firstCall.args[0]).toMatchObject({
+    host: "localhost",
+    port: 25565,
+    username: "TestBot",
+    version: "1.21.11",
+  });
+  expect(connection.getState()).toBe("connecting");
+  expect(connection.getRefusal()).toBe(null);
+});
+
+test("connect joins a 26.1.2 server with that exact version", async () => {
+  const { connection, createBot } = gateConnection(
+    Promise.resolve({ version: { name: "26.1.2", protocol: 775 } }),
+  );
+
+  await connection.connect();
+
+  expect(createBot.firstCall.args[0].version).toBe("26.1.2");
+});
+
+test("connect refuses a 26.3 server and never creates a bot", async () => {
+  const { connection, callbacks, createBot } = gateConnection(
+    Promise.resolve({ version: { name: "26.3", protocol: 777 } }),
+  );
+
+  await connection.connect();
+
+  expect(createBot.notCalled).toBe(true);
+  expect(connection.getState()).toBe("disconnected");
+  expect(connection.getRefusal()).toContain("26.3 (protocol 777), which is not supported.");
+  expect(connection.getRefusal()).toContain("Supported versions: 1.21.11, 26.1.2.");
+  expect(callbacks.onLog.calledWith("error", connection.getRefusal())).toBe(true);
+});
+
+test("connect refuses a server that answers the ping without a protocol number", async () => {
+  const { connection, createBot } = gateConnection(
+    Promise.resolve({ version: "1.6.4", motd: "", playerCount: 0, maxPlayers: 20 }),
+  );
+
+  await connection.connect();
+
+  expect(createBot.notCalled).toBe(true);
+  expect(connection.getRefusal()).toContain("The Minecraft server runs 1.6.4 (protocol -1)");
+});
+
+test("connect logs an unreachable server and stays disconnected without a refusal", async () => {
+  const { connection, callbacks, createBot } = gateConnection(
+    Promise.reject(new Error("connect ECONNREFUSED")),
+  );
+
+  await connection.connect();
+
+  expect(createBot.notCalled).toBe(true);
+  expect(connection.getState()).toBe("disconnected");
+  expect(connection.getRefusal()).toBe(null);
+  expect(
+    callbacks.onLog.calledWith(
+      "error",
+      "Cannot reach the Minecraft server at localhost:25565: connect ECONNREFUSED",
+    ),
+  ).toBe(true);
+});
+
+test("checkConnectionAndReconnect returns the refusal as soon as the gate refuses", async () => {
+  const { connection } = gateConnection(
+    Promise.resolve({ version: { name: "26.3", protocol: 777 } }),
+  );
+
+  const started = Date.now();
+  const result = await connection.checkConnectionAndReconnect();
+
+  expect(result.connected).toBe(false);
+  expect(result.message).toContain("26.3 (protocol 777), which is not supported.");
+  expect(Date.now() - started).toBeLessThan(2000);
+});
+
+test("connect gives the ping a 10 second timeout", async () => {
+  const { connection, ping } = gateConnection(
+    Promise.resolve({ version: { name: "1.21.11", protocol: 774 } }),
+  );
+
+  await connection.connect();
+
+  expect(ping.firstCall.args[0]).toStrictEqual({
+    host: "localhost",
+    port: 25565,
+    closeTimeout: 10_000,
+  });
+});
+
+test("a server that closes the connection before spawn leaves the state disconnected", async () => {
+  const { connection, createBot } = gateConnection(
+    Promise.resolve({ version: { name: "1.21.11", protocol: 774 } }),
+  );
+  await connection.connect();
+  const bot = createBot.firstCall.returnValue as EventEmitter;
+  expect(connection.getState()).toBe("connecting");
+
+  bot.emit("end", "You are not whitelisted on this server!");
+
+  expect(connection.getState()).toBe("disconnected");
+  expect(connection.getBot()).toBe(null);
 });

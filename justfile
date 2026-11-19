@@ -26,9 +26,9 @@ require +tools:
     fi
 
 # The lint recipe runs the type check too, through the bun-check hook in prek.toml.
-[doc('Run the gate that proves a change: lint, type check, unit tests and build')]
+[doc('Run the gate that proves a change: lint, type check, unit tests, build and a start in Node')]
 [group('check')]
-check: lint test build
+check: lint test build smoke
 
 [doc('Run the prek hooks in prek.toml on every file, and show the diff of any file they fix')]
 [group('check')]
@@ -41,7 +41,7 @@ lint: (require "prek" "bun")
 fmt: (require "prek" "bun")
     prek run --all-files || prek run --all-files
 
-[doc('Type-check src and tests')]
+[doc('Type-check src, tests and scripts')]
 [group('check')]
 typecheck: (require "bun")
     bun check
@@ -50,6 +50,12 @@ typecheck: (require "bun")
 [group('check')]
 test *files: (require "bun")
     bun run test "$@"
+
+# bun runs the unit tests and resolves CommonJS imports that Node refuses, so this loads the built server in Node, the runtime that users run.
+[doc('Start the built server in Node with --help, which loads every module and exits')]
+[group('check')]
+smoke: (require "node") build
+    node dist/main.js --help > /dev/null
 
 [doc('Compile src into dist/')]
 [group('build')]
@@ -60,6 +66,24 @@ build: (require "bun")
 [group('run')]
 dev *args: (require "bun" "node")
     bun run dev "$@"
+
+[doc('Run the in-game check against a real Minecraft server, for example: just ingame 1.21.11')]
+[group('ingame')]
+ingame version *flags: (require "bun" "node" "java") build
+    bun scripts/ingame-check.ts "$@"
+
+# 26.3 is deferred until a mineflayer release supports it, so its run checks that the bot refuses the server (spec/4-supported-minecraft-versions.md).
+[doc('Run the in-game check for every supported version, then the refusal check for 26.3')]
+[group('ingame')]
+ingame-all: (require "bun" "node" "java") build
+    bun scripts/ingame-check.ts 1.21.11
+    bun scripts/ingame-check.ts 26.1.2
+    bun scripts/ingame-check.ts 26.3
+
+[doc('Download a vanilla server jar into the cache, check its SHA-1 and print its path')]
+[group('ingame')]
+server-jar version: (require "bun")
+    bun scripts/server-jar.ts "$@"
 
 # bun.lock is the only lockfile (docs/adr/0002-bun-is-the-only-package-manager.md), so install never resolves new versions.
 [doc('Install the dependencies from bun.lock')]

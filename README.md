@@ -6,7 +6,14 @@ This repo started as a fork of [yuniko-software/minecraft-mcp-server](https://gi
 
 ## Minecraft versions
 
-The bot uses mineflayer 4.39.0. Issue #4 sets the list of supported versions and adds an in-game check for each one.
+| Version | Status |
+| --- | --- |
+| 1.21.11 | Supported. Checked in game. |
+| 26.1.2 | Supported. Checked in game. |
+| 26.3 | Not yet. It waits for a mineflayer release that supports it. The bot refuses a 26.3 server with a message. |
+| 26.2 | Skipped. |
+
+The bot pings the server before it joins and refuses any version that is not on this list. [docs/verification.md](docs/verification.md) records the in-game check of each version, and [ADR 0003](docs/adr/0003-supported-minecraft-versions.md) says why the list is what it is.
 
 ## Requirements
 

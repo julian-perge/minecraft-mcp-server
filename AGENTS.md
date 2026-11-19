@@ -10,13 +10,19 @@ now its own project. See `docs/adr/0001-the-fork-is-its-own-project.md`.
 Run the project's tasks through their `just` recipes. `just` lists them, and
 a recipe stops with a message when a tool it needs is missing.
 
-- `just check` runs the lint, the type check, the unit tests and the build.
-  It is the one command that proves a change.
+- `just check` runs the lint, the type check, the unit tests, the build and
+  a start of the built server in Node. It is the one command that proves a
+  change. It runs no Minecraft server.
+- `just ingame <version>` runs the bot against a real vanilla server of that
+  version and calls every tool. Run it after a change to a tool, to the
+  connection or to a dependency of mineflayer, and record the result in
+  `docs/verification.md`. `just ingame-all` runs every version. It needs
+  Java, and it downloads the server jar once into `MC_SERVER_CACHE`.
 - `just lint` runs the prek hooks in `prek.toml` on every file. `just fmt`
   runs them twice and keeps their fixes.
 - `just test` runs the unit tests. `just test tests/chat-tools.test.ts`
   runs one file.
-- `just dev` starts the server from source. Arguments pass through, for
+- `just dev` builds the server and starts it in Node. Arguments pass through, for
   example `just dev --port 25566`.
 
 ## Setup
@@ -24,8 +30,20 @@ a recipe stops with a message when a tool it needs is missing.
 - Install bun 1.4.4 or later, Node 22 or later, `just` and `prek`. bun is
   the only package manager and runs the tests and scripts. The server itself
   runs on Node. See `docs/adr/0002-bun-is-the-only-package-manager.md`.
+- The in-game check also needs Java 21 or later for 1.21.11, and Java 25 or
+  later for 26.1.2 and 26.3.
 - `just install` installs the dependencies from `bun.lock`.
 - `prek install` makes the hooks run on each commit.
+
+## Minecraft versions
+
+- The bot supports Minecraft 1.21.11 and 26.1.2. 26.3 is deferred until a
+  mineflayer release supports it, and 26.2 is skipped. See
+  `docs/adr/0003-supported-minecraft-versions.md`.
+- `src/minecraft-versions.ts` is the one list. README.md and
+  `docs/verification.md` name the same versions. Claim a version only after
+  `just ingame <version>` passed.
+- Name exact versions, not "26.x" or "1.21.x".
 
 ## Fork rules
 
