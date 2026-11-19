@@ -1,7 +1,6 @@
 import mineflayer from "mineflayer";
 import pathfinderPkg from "mineflayer-pathfinder";
 const { pathfinder, Movements } = pathfinderPkg;
-import minecraftData from "minecraft-data";
 import minecraftProtocol, { type NewPingResult, type OldPingResult } from "minecraft-protocol";
 import { checkServerVersion, supportedVersionNames } from "./minecraft-versions.js";
 
@@ -130,8 +129,7 @@ export class BotConnection {
       this.state = "connected";
       this.callbacks.onLog("info", "Bot spawned in world");
 
-      const mcData = minecraftData(bot.version);
-      const defaultMove = new Movements(bot, mcData);
+      const defaultMove = new Movements(bot);
       bot.pathfinder.setMovements(defaultMove);
 
       bot.chat("LLM-powered bot ready to receive instructions!");
