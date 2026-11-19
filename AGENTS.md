@@ -14,10 +14,12 @@ a recipe stops with a message when a tool it needs is missing.
   a start of the built server in Node. It is the one command that proves a
   change. It runs no Minecraft server.
 - `just ingame <version>` runs the bot against a real vanilla server of that
-  version and calls every tool. Run it after a change to a tool, to the
+  version. For a supported version it calls every tool. For 26.3 it checks
+  that the bot refuses the server. Run it after a change to a tool, to the
   connection or to a dependency of mineflayer, and record the result in
-  `docs/verification.md`. `just ingame-all` runs every version. It needs
-  Java, and it downloads the server jar once into `MC_SERVER_CACHE`.
+  `docs/verification.md`. `just ingame-all` runs every supported version,
+  then the refusal check for 26.3. It needs Java, and it downloads the
+  server jar once into `MC_SERVER_CACHE`.
 - `just lint` runs the prek hooks in `prek.toml` on every file. `just fmt`
   runs them, runs them again when the first run fails, and keeps their fixes.
 - `just test` runs the unit tests. `just test tests/chat-tools.test.ts`

@@ -54,5 +54,5 @@ Structure Lab's `export_structure` tool returns a clean `.nbt` file, a vanilla d
 This is the in-game step of the minecraft-worldedit-ops skill: after a `//paste`, check the blocks and that a player can walk from spawn.
 
 1. `move-to-position` to the spawn point.
-2. `can-reach` to each point that a player must reach from spawn. `can-reach` counts only walking, jumping and climbing, not digging or building. A `FAIL` answer gives the pathfinder's status: `noPath` (no way in) or `timeout` (the search used all of `timeoutMs`).
+2. `can-reach` to each point that a player must reach from spawn. `can-reach` counts walking, jumping, climbing and swimming across water, not digging or building. A spot that a player can reach only by swimming, or by a drop of any height into water, still gets `PASS`. A `FAIL` answer gives the pathfinder's status: `noPath` (no way in) or `timeout` (the search used all of `timeoutMs`).
 3. `check-blocks` with a few blocks that the schematic must have, such as the floor under the spawn point and the doors.
