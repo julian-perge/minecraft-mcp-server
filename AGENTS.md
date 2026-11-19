@@ -21,8 +21,10 @@ a recipe stops with a message when a tool it needs is missing.
 
 ## Setup
 
-- Install Node 20.10 or later, `just` and `prek`.
-- `just install` installs the dependencies from `package-lock.json`.
+- Install bun 1.4.4 or later, Node 22 or later, `just` and `prek`. bun is
+  the only package manager and runs the tests and scripts. The server itself
+  runs on Node. See `docs/adr/0002-bun-is-the-only-package-manager.md`.
+- `just install` installs the dependencies from `bun.lock`.
 - `prek install` makes the hooks run on each commit.
 
 ## Fork rules

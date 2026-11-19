@@ -25,6 +25,6 @@ repo = "local"
 [[repos.hooks]]
 id = "eslint"
 name = "eslint"
-entry = "npx --no eslint"
+entry = "bun x eslint"
 language = "system"
 types = ["ts"]
