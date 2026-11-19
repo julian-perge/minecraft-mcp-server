@@ -1,6 +1,6 @@
 # Local shortcuts for checking, building and running the MCP server. `just` lists them, and `just <recipe>` runs one.
 #
-# CI does not call just. .github/workflows/build.yml runs the same npm scripts directly.
+# CI does not call just. .github/workflows/build.yml runs ESLint, tsc, the tests and the build with npm directly, and does not run the prek hooks.
 
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
