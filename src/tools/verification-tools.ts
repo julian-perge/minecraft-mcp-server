@@ -19,7 +19,7 @@ const MAX_MESSAGES = 50;
 
 const coordinate = z.coerce.number().int();
 
-// A copy of the bot's movements that only walks, jumps and climbs. The default movements also dig through blocks and build pillars, so a path through a wall would count as reachable.
+// A copy of the bot's movements with digging and building turned off. The default movements dig through blocks and build pillars, so a path through a wall would count as reachable. Walking, jumping, climbing and swimming across water still count.
 function walkingMovements(movements: Movements): Movements {
   return Object.assign(Object.create(Object.getPrototypeOf(movements)) as Movements, movements, {
     canDig: false,
@@ -176,7 +176,7 @@ export function registerVerificationTools(
 
   factory.registerTool(
     "can-reach",
-    "Check whether the bot can walk to a position, without moving it. Only walking, jumping and climbing count, not digging or building. Returns the pathfinder's result (success, timeout or noPath) and the length of the path.",
+    "Check whether the bot can walk to a position, without moving it. Walking, jumping, climbing and swimming across water count, not digging or building. Returns the pathfinder's result (success, timeout or noPath) and the length of the path.",
     {
       x: coordinate,
       y: coordinate,

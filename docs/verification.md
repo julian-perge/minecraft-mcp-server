@@ -12,7 +12,7 @@ just ingame 26.3
 
 26.3 is on the unsupported list in `src/minecraft-versions.ts`, so its run checks the refusal. `--expect-refusal` runs the refusal check against any other version.
 
-`just ingame-all` runs all three in that order. Each run downloads the vanilla server jar into `MC_SERVER_CACHE` (default `~/.cache/minecraft-mcp-server/servers`) once and checks its SHA-1. It starts the server in offline mode on a flat world in a temporary folder, starts `node dist/main.js` through the MCP SDK client, calls every tool the server lists, and checks world state with server console commands. `--report <file>` writes the results as JSON.
+`just ingame-all` runs all three in that order. Each run downloads the vanilla server jar into `MC_SERVER_CACHE` (default `~/.cache/minecraft-mcp-server/servers`) once and checks its SHA-1. It starts the server in offline mode on a flat world in a temporary folder, starts `node dist/main.js` through the MCP SDK client, calls every tool the server lists on a supported version, and checks world state with server console commands. For 26.3 it checks that the bot refuses the server and never joins. `--report <file>` writes the results as JSON.
 
 The 1.21.11 server needs Java 21 or later, and the 26.1.2 and 26.3 servers need Java 25 or later. `JAVA_HOME_21` or `JAVA_HOME_25` picks a Java. Without them the check uses `java` on `PATH`.
 

@@ -53,7 +53,7 @@ async function fetchVersionJson(version: string): Promise<Uint8Array> {
   return bytes;
 }
 
-// The jar is downloaded to a temporary name and renamed only after its SHA-1 matches, so an interrupted download never looks like a cached jar.
+// The jar's SHA-1 is checked in memory, then the jar is written to a .part file and renamed, so an interrupted write never looks like a cached jar.
 export async function resolveServerJar(
   version: string,
   cacheDir = serverCacheDir(),
