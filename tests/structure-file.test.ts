@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import nbt from "prismarine-nbt";
 import { parseStructure, readStructureFile } from "../src/structure-file.js";
-import { structureNbt } from "./helpers/structure-nbt.js";
+import { structureNbt } from "../scripts/structure-nbt.js";
 
 const blocks = [
   { pos: [0, 0, 0] as [number, number, number], name: "minecraft:stone" },

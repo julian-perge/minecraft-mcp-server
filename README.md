@@ -104,6 +104,13 @@ Crafting and smelting:
 - `craft-item`: craft an item.
 - `smelt-item`: smelt items in a furnace, blast furnace or smoker.
 
+Verification, for checks after a datapack, a structure or a server change. [docs/verify-in-game.md](docs/verify-in-game.md) shows the flows:
+
+- `run-command`: run one server command as the bot and return the replies. The bot needs operator rights for most commands.
+- `check-blocks`: check that the world has the expected blocks, and answer PASS or FAIL.
+- `verify-structure`: compare a structure template `.nbt` file, such as a Structure Lab export, with the placed blocks.
+- `can-reach`: check whether the bot can walk to a position, without moving it.
+
 Entities, chat and game state:
 
 - `find-entity`: find the nearest entity of a type.

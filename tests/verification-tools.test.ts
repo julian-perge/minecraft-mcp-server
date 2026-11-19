@@ -8,7 +8,7 @@ import sinon from "sinon";
 import { Vec3 } from "vec3";
 import { registerVerificationTools } from "../src/tools/verification-tools.js";
 import { connectTools, textOf } from "./helpers/mcp-client.js";
-import { structureNbt } from "./helpers/structure-nbt.js";
+import { structureNbt } from "../scripts/structure-nbt.js";
 
 function blockWorld(
   blocks: Record<string, { name: string; properties?: Record<string, unknown> }>,
