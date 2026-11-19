@@ -93,7 +93,7 @@ test("move-to-position returns error when pathfinding fails", async () => {
     entity: {
       position: new Vec3(10, 20, 30),
     },
-  } as Partial<mineflayer.Bot>;
+  } as unknown as Partial<mineflayer.Bot>;
   const getBot = () => mockBot as mineflayer.Bot;
 
   registerPositionTools(factory, getBot);
@@ -124,7 +124,7 @@ test("move-to-position returns timeout error and stops pathfinder", async () => 
         goto: sinon.stub().returns(new Promise(() => {})),
         stop: sinon.stub(),
       },
-    } as Partial<mineflayer.Bot>;
+    } as unknown as Partial<mineflayer.Bot>;
     const getBot = () => mockBot as mineflayer.Bot;
 
     registerPositionTools(factory, getBot);
@@ -159,7 +159,7 @@ test("move-to-position succeeds without timeout and does not stop pathfinder", a
       goto: sinon.stub().resolves(),
       stop: sinon.stub(),
     },
-  } as Partial<mineflayer.Bot>;
+  } as unknown as Partial<mineflayer.Bot>;
   const getBot = () => mockBot as mineflayer.Bot;
 
   registerPositionTools(factory, getBot);
@@ -191,7 +191,7 @@ test("move-to-position succeeds before timeout and does not stop pathfinder", as
         goto: sinon.stub().resolves(),
         stop: sinon.stub(),
       },
-    } as Partial<mineflayer.Bot>;
+    } as unknown as Partial<mineflayer.Bot>;
     const getBot = () => mockBot as mineflayer.Bot;
 
     registerPositionTools(factory, getBot);
@@ -231,7 +231,7 @@ test("move-to-position preserves pathfinder error when not timing out", async ()
         ),
       stop: sinon.stub(),
     },
-  } as Partial<mineflayer.Bot>;
+  } as unknown as Partial<mineflayer.Bot>;
   const getBot = () => mockBot as mineflayer.Bot;
 
   registerPositionTools(factory, getBot);

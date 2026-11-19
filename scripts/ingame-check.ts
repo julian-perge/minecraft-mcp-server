@@ -1,6 +1,6 @@
 import { type ChildProcessWithoutNullStreams, spawn, spawnSync } from "node:child_process";
 import { createWriteStream, existsSync, readFileSync } from "node:fs";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -21,6 +21,7 @@ import {
   parseJavaMajor,
   serverProperties,
 } from "./ingame-lib.js";
+import { structureNbt } from "./structure-nbt.js";
 import { supportedVersionNames, UNSUPPORTED_VERSIONS } from "../src/minecraft-versions.js";
 import { resolveServerJar } from "./server-jar.js";
 
@@ -195,6 +196,41 @@ function pickJava(version: string, needed: number): string {
   }
   javaVersionText = output.split("\n")[0].trim();
   return java;
+}
+
+// verify-structure reads the same file that the datapack hands to /place template, as in the Structure Lab flow in docs/verify-in-game.md.
+const STRUCTURE_ID = "checks:hut";
+let structurePath = "";
+
+// A pack in the world's datapacks folder is enabled when the server creates the world. The format range covers data pack 94.1 (1.21.11) and 101.1 (26.1.2), from each server jar's version.json.
+async function writeCheckDatapack(serverDir: string): Promise<string> {
+  const packDir = join(serverDir, "world", "datapacks", "checks");
+  const structureDir = join(packDir, "data", "checks", "structure");
+  await mkdir(structureDir, { recursive: true });
+  await writeFile(
+    join(packDir, "pack.mcmeta"),
+    JSON.stringify({
+      pack: { description: "in-game check", min_format: [94, 1], max_format: [101, 1] },
+    }),
+  );
+  const nbtPath = join(structureDir, "hut.nbt");
+  await writeFile(
+    nbtPath,
+    structureNbt(
+      [2, 2, 1],
+      [
+        { pos: [0, 0, 0], name: "minecraft:cobblestone" },
+        { pos: [1, 0, 0], name: "minecraft:oak_planks" },
+        { pos: [0, 1, 0], name: "minecraft:glass" },
+        {
+          pos: [1, 1, 0],
+          name: "minecraft:oak_stairs",
+          properties: { facing: "north", half: "bottom", shape: "straight", waterlogged: "false" },
+        },
+      ],
+    ),
+  );
+  return nbtPath;
 }
 
 function textOf(result: CallToolResult): string {
@@ -421,6 +457,97 @@ function gameChecks(): Check[] {
       },
     },
     {
+      tool: "run-command",
+      run: async () => {
+        await server!.command(`op ${USERNAME}`, (m) =>
+          m.startsWith(`Made ${USERNAME} a server operator`),
+        );
+        return retry(5, 1000, () =>
+          expectTool("run-command", { command: "seed", waitMs: 2000 }, /^- Seed: \[-?\d+\]$/m),
+        );
+      },
+    },
+    {
+      tool: "check-blocks",
+      run: async () => {
+        await server!.command("setblock 8 -60 8 minecraft:oak_stairs[facing=east]", (m) =>
+          m.startsWith("Changed the block at 8, -60, 8"),
+        );
+        const pass = await retry(10, 500, () =>
+          expectTool(
+            "check-blocks",
+            {
+              blocks: [
+                {
+                  x: 8,
+                  y: -60,
+                  z: 8,
+                  block: "minecraft:oak_stairs",
+                  properties: { facing: "east" },
+                },
+                { x: 8, y: -61, z: 8, block: "grass_block" },
+              ],
+            },
+            /^PASS: all 2 blocks match\.$/,
+          ),
+        );
+        const fail = await expectTool(
+          "check-blocks",
+          { blocks: [{ x: 8, y: -60, z: 8, block: "oak_stairs", properties: { facing: "west" } }] },
+          /^FAIL: 0 of 1 block matches, 1 differs\./,
+        );
+        return `${pass} ${fail}`;
+      },
+    },
+    {
+      tool: "verify-structure",
+      run: async () => {
+        await server!.command(`place template ${STRUCTURE_ID} 10 -60 10`, (m) =>
+          m.includes(STRUCTURE_ID),
+        );
+        const origin = { x: 10, y: -60, z: 10 };
+        const pass = await retry(10, 500, () =>
+          expectTool(
+            "verify-structure",
+            { path: structurePath, ...origin },
+            /^PASS: all 4 blocks match\.$/m,
+          ),
+        );
+        await server!.command("setblock 11 -60 10 minecraft:dirt", (m) =>
+          m.startsWith("Changed the block at 11, -60, 10"),
+        );
+        const fail = await retry(10, 500, () =>
+          expectTool(
+            "verify-structure",
+            { path: structurePath, ...origin },
+            /- \(11, -60, 10\): expected oak_planks, found dirt/,
+          ),
+        );
+        return `${pass} After a setblock: ${fail}`;
+      },
+    },
+    {
+      tool: "can-reach",
+      run: async () => {
+        const open = await expectTool(
+          "can-reach",
+          { x: 8, y: -60, z: 2, range: 1 },
+          /^PASS: .* is success, with \d+ steps\.$/,
+        );
+        await server!.command("fill 20 -61 20 24 -57 24 minecraft:bedrock hollow", (m) =>
+          /^Successfully filled \d+ block/.test(m),
+        );
+        const sealed = await retry(10, 500, () =>
+          expectTool(
+            "can-reach",
+            { x: 22, y: -60, z: 22, range: 0, timeoutMs: 3000 },
+            /^FAIL: .* is (noPath|timeout), with \d+ steps\.$/,
+          ),
+        );
+        return `${open} A bedrock box: ${sealed}`;
+      },
+    },
+    {
       tool: "send-chat",
       run: async () => {
         const seen = server!.waitFor(
@@ -525,6 +652,7 @@ async function main(): Promise<void> {
   tempDir = await mkdtemp(join(tmpdir(), `mc-ingame-${args.version}-`));
   await writeFile(join(tempDir, "eula.txt"), "eula=true\n");
   await writeFile(join(tempDir, "server.properties"), serverProperties(port));
+  structurePath = await writeCheckDatapack(tempDir);
   console.log(`Minecraft ${args.version} on port ${port} in ${tempDir}, ${javaVersionText}`);
 
   server = new MinecraftServer(
