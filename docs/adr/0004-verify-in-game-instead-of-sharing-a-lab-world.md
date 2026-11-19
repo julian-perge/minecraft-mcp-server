@@ -103,8 +103,9 @@ bot is.
   their side: julian-perge/minecraft-agent-skills#95 and
   julian-perge/MinecraftStructureInjector#1.
 - `run-command` runs whatever the server lets the bot run. The server's
-  permissions decide which commands run. The tool refuses only a command
-  over 256 characters or one with a control character or the section sign.
+  permissions decide which commands run. The tool refuses only an empty
+  command, a command over 256 characters, or one with a control character or
+  the section sign.
 - `verify-structure` reads a file path that the MCP client gives it. The MCP
   server runs on the client's machine with the client's rights. The tool
   refuses a relative path. The reader refuses a path that is not a regular
