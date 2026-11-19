@@ -1,4 +1,4 @@
-import test from "ava";
+import { test, expect } from "bun:test";
 import sinon from "sinon";
 import { EventEmitter } from "events";
 import { registerFurnaceTools } from "../src/tools/furnace-tools.js";
@@ -16,7 +16,7 @@ const createMockItem = (fields: {
   slot?: number;
 }): Item => fields as unknown as Item;
 
-test("registerFurnaceTools registers smelt-item tool", (t) => {
+test("registerFurnaceTools registers smelt-item tool", () => {
   const mockServer = { tool: sinon.stub() } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -29,11 +29,11 @@ test("registerFurnaceTools registers smelt-item tool", (t) => {
 
   const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
   const smeltCall = toolCalls.find((call) => call.args[0] === "smelt-item");
-  t.truthy(smeltCall);
-  t.is(smeltCall!.args[1], "Smelt items using a furnace-like block");
+  expect(smeltCall).toBeTruthy();
+  expect(smeltCall!.args[1]).toBe("Smelt items using a furnace-like block");
 });
 
-test("smelt-item returns error when no furnace block found", async (t) => {
+test("smelt-item returns error when no furnace block found", async () => {
   const mockServer = { tool: sinon.stub() } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -59,10 +59,10 @@ test("smelt-item returns error when no furnace block found", async (t) => {
     fuelItem: "coal",
   });
 
-  t.true(result.content[0].text.includes("No furnace block found"));
+  expect(result.content[0].text.includes("No furnace block found")).toBe(true);
 });
 
-test("smelt-item loads input and fuel and takes output", async (t) => {
+test("smelt-item loads input and fuel and takes output", async () => {
   const mockServer = { tool: sinon.stub() } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -112,14 +112,14 @@ test("smelt-item loads input and fuel and takes output", async (t) => {
     fuelItem: "coal",
   });
 
-  t.true(result.content[0].text.includes("Smelted 1 iron_ingot"));
-  t.true((furnace.putInput as sinon.SinonStub).calledOnce);
-  t.true((furnace.putFuel as sinon.SinonStub).calledOnce);
-  t.true((furnace.takeOutput as sinon.SinonStub).calledOnce);
-  t.true((furnace.close as sinon.SinonStub).calledOnce);
+  expect(result.content[0].text.includes("Smelted 1 iron_ingot")).toBe(true);
+  expect((furnace.putInput as sinon.SinonStub).calledOnce).toBe(true);
+  expect((furnace.putFuel as sinon.SinonStub).calledOnce).toBe(true);
+  expect((furnace.takeOutput as sinon.SinonStub).calledOnce).toBe(true);
+  expect((furnace.close as sinon.SinonStub).calledOnce).toBe(true);
 });
 
-test("smelt-item returns validation error for non-positive counts", async (t) => {
+test("smelt-item returns validation error for non-positive counts", async () => {
   const mockServer = { tool: sinon.stub() } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -144,9 +144,9 @@ test("smelt-item returns validation error for non-positive counts", async (t) =>
     fuelCount: 1,
   });
 
-  t.true(inputCountResult.isError);
-  t.true(inputCountResult.content[0].text.includes("Invalid tool arguments"));
-  t.true(inputCountResult.content[0].text.includes("inputCount"));
+  expect(inputCountResult.isError).toBe(true);
+  expect(inputCountResult.content[0].text.includes("Invalid tool arguments")).toBe(true);
+  expect(inputCountResult.content[0].text.includes("inputCount")).toBe(true);
 
   const fuelCountResult = await executor({
     x: 1,
@@ -158,7 +158,7 @@ test("smelt-item returns validation error for non-positive counts", async (t) =>
     fuelCount: -1,
   });
 
-  t.true(fuelCountResult.isError);
-  t.true(fuelCountResult.content[0].text.includes("Invalid tool arguments"));
-  t.true(fuelCountResult.content[0].text.includes("fuelCount"));
+  expect(fuelCountResult.isError).toBe(true);
+  expect(fuelCountResult.content[0].text.includes("Invalid tool arguments")).toBe(true);
+  expect(fuelCountResult.content[0].text.includes("fuelCount")).toBe(true);
 });

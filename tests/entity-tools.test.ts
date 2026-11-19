@@ -1,4 +1,4 @@
-import test from "ava";
+import { test, expect } from "bun:test";
 import sinon from "sinon";
 import { registerEntityTools } from "../src/tools/entity-tools.js";
 import { ToolFactory } from "../src/tool-factory.js";
@@ -7,7 +7,7 @@ import type { BotConnection } from "../src/bot-connection.js";
 import type mineflayer from "mineflayer";
 import { Vec3 } from "vec3";
 
-test("registerEntityTools registers find-entity tool", (t) => {
+test("registerEntityTools registers find-entity tool", () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -23,11 +23,11 @@ test("registerEntityTools registers find-entity tool", (t) => {
   const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
   const findEntityCall = toolCalls.find((call) => call.args[0] === "find-entity");
 
-  t.truthy(findEntityCall);
-  t.is(findEntityCall!.args[1], "Find the nearest entity of a specific type");
+  expect(findEntityCall).toBeTruthy();
+  expect(findEntityCall!.args[1]).toBe("Find the nearest entity of a specific type");
 });
 
-test("find-entity returns entity when found", async (t) => {
+test("find-entity returns entity when found", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -57,13 +57,13 @@ test("find-entity returns entity when found", async (t) => {
 
   const result = await executor({ type: "zombie", maxDistance: 16 });
 
-  t.true(result.content[0].text.includes("zombie"));
-  t.true(result.content[0].text.includes("5"));
-  t.true(result.content[0].text.includes("64"));
-  t.true(result.content[0].text.includes("8"));
+  expect(result.content[0].text.includes("zombie")).toBe(true);
+  expect(result.content[0].text.includes("5")).toBe(true);
+  expect(result.content[0].text.includes("64")).toBe(true);
+  expect(result.content[0].text.includes("8")).toBe(true);
 });
 
-test("find-entity returns not found when entity too far", async (t) => {
+test("find-entity returns not found when entity too far", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -93,10 +93,10 @@ test("find-entity returns not found when entity too far", async (t) => {
 
   const result = await executor({ type: "zombie", maxDistance: 16 });
 
-  t.true(result.content[0].text.includes("No zombie found within 16 blocks"));
+  expect(result.content[0].text.includes("No zombie found within 16 blocks")).toBe(true);
 });
 
-test("find-entity returns not found when no entity exists", async (t) => {
+test("find-entity returns not found when no entity exists", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -121,10 +121,10 @@ test("find-entity returns not found when no entity exists", async (t) => {
 
   const result = await executor({ type: "zombie", maxDistance: 16 });
 
-  t.true(result.content[0].text.includes("No zombie found"));
+  expect(result.content[0].text.includes("No zombie found")).toBe(true);
 });
 
-test("find-entity handles player type", async (t) => {
+test("find-entity handles player type", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -154,10 +154,10 @@ test("find-entity handles player type", async (t) => {
 
   const result = await executor({ type: "player", maxDistance: 16 });
 
-  t.true(result.content[0].text.includes("TestPlayer"));
+  expect(result.content[0].text.includes("TestPlayer")).toBe(true);
 });
 
-test("find-entity searches any entity when type not specified", async (t) => {
+test("find-entity searches any entity when type not specified", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -187,5 +187,5 @@ test("find-entity searches any entity when type not specified", async (t) => {
 
   const result = await executor({ maxDistance: 16 });
 
-  t.true(result.content[0].text.includes("cow"));
+  expect(result.content[0].text.includes("cow")).toBe(true);
 });

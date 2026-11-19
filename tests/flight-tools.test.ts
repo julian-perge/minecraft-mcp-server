@@ -1,4 +1,4 @@
-import test from "ava";
+import { test, expect } from "bun:test";
 import sinon from "sinon";
 import { registerFlightTools } from "../src/tools/flight-tools.js";
 import { ToolFactory } from "../src/tool-factory.js";
@@ -7,7 +7,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type mineflayer from "mineflayer";
 import { Vec3 } from "vec3";
 
-test("registerFlightTools registers fly-to tool", (t) => {
+test("registerFlightTools registers fly-to tool", () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -23,11 +23,11 @@ test("registerFlightTools registers fly-to tool", (t) => {
   const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
   const flyToCall = toolCalls.find((call) => call.args[0] === "fly-to");
 
-  t.truthy(flyToCall);
-  t.is(flyToCall!.args[1], "Make the bot fly to a specific position");
+  expect(flyToCall).toBeTruthy();
+  expect(flyToCall!.args[1]).toBe("Make the bot fly to a specific position");
 });
 
-test("fly-to successfully flies to destination", async (t) => {
+test("fly-to successfully flies to destination", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -57,13 +57,13 @@ test("fly-to successfully flies to destination", async (t) => {
 
   const result = await executor({ x: 100, y: 80, z: 200 });
 
-  t.true(flyToStub.calledOnce);
-  t.true(stopFlyingStub.calledOnce);
-  t.true(result.content[0].text.includes("Successfully flew"));
-  t.true(result.content[0].text.includes("100"));
+  expect(flyToStub.calledOnce).toBe(true);
+  expect(stopFlyingStub.calledOnce).toBe(true);
+  expect(result.content[0].text.includes("Successfully flew")).toBe(true);
+  expect(result.content[0].text.includes("100")).toBe(true);
 });
 
-test("fly-to returns error when creative mode not available", async (t) => {
+test("fly-to returns error when creative mode not available", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -85,10 +85,10 @@ test("fly-to returns error when creative mode not available", async (t) => {
 
   const result = await executor({ x: 100, y: 80, z: 200 });
 
-  t.true(result.content[0].text.includes("Creative mode is not available"));
+  expect(result.content[0].text.includes("Creative mode is not available")).toBe(true);
 });
 
-test("fly-to handles flight errors", async (t) => {
+test("fly-to handles flight errors", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -118,6 +118,6 @@ test("fly-to handles flight errors", async (t) => {
 
   const result = await executor({ x: 100, y: 80, z: 200 });
 
-  t.true(result.isError);
-  t.true(result.content[0].text.includes("Cannot reach destination"));
+  expect(result.isError).toBe(true);
+  expect(result.content[0].text.includes("Cannot reach destination")).toBe(true);
 });

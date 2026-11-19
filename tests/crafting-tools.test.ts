@@ -1,4 +1,4 @@
-import test from "ava";
+import { test, expect } from "bun:test";
 import sinon from "sinon";
 import { registerCraftingTools } from "../src/tools/crafting-tools.js";
 import { ToolFactory } from "../src/tool-factory.js";
@@ -78,7 +78,7 @@ function countRecipeIngredients(mcData: unknown, recipe: unknown): Record<string
   return counts;
 }
 
-test("registerCraftingTools registers all 4 tools", (t) => {
+test("registerCraftingTools registers all 4 tools", () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -94,13 +94,13 @@ test("registerCraftingTools registers all 4 tools", (t) => {
   const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
   const toolNames = toolCalls.map((call) => call.args[0]);
 
-  t.true(toolNames.includes("list-recipes"));
-  t.true(toolNames.includes("craft-item"));
-  t.true(toolNames.includes("get-recipe"));
-  t.true(toolNames.includes("can-craft"));
+  expect(toolNames.includes("list-recipes")).toBe(true);
+  expect(toolNames.includes("craft-item")).toBe(true);
+  expect(toolNames.includes("get-recipe")).toBe(true);
+  expect(toolNames.includes("can-craft")).toBe(true);
 });
 
-test("can-craft with empty inventory returns missing items", async (t) => {
+test("can-craft with empty inventory returns missing items", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -126,12 +126,12 @@ test("can-craft with empty inventory returns missing items", async (t) => {
   const result = await executor({ itemName: "stick" });
 
   const text = result.content[0].text.toLowerCase();
-  t.true(text.includes("cannot craft"));
-  t.true(text.includes("missing"));
-  t.true(text.includes("- "));
+  expect(text.includes("cannot craft")).toBe(true);
+  expect(text.includes("missing")).toBe(true);
+  expect(text.includes("- ")).toBe(true);
 });
 
-test("get-recipe returns recipe structure for valid item", async (t) => {
+test("get-recipe returns recipe structure for valid item", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -165,17 +165,17 @@ test("get-recipe returns recipe structure for valid item", async (t) => {
     const res = r.result as Record<string, unknown> | undefined;
     return !!res && typeof res.id === "number" && res.id === stickId;
   });
-  t.truthy(stickRecipe);
+  expect(stickRecipe).toBeTruthy();
   const ingredientCounts = countRecipeIngredients(mcData, stickRecipe);
   const ingredientNames = Object.keys(ingredientCounts);
 
   const text = result.content[0].text.toLowerCase();
-  t.true(text.includes("ingredients"));
-  t.true(ingredientNames.some((n) => text.includes(n.toLowerCase())));
-  t.true(Array.isArray(result.content));
+  expect(text.includes("ingredients")).toBe(true);
+  expect(ingredientNames.some((n) => text.includes(n.toLowerCase()))).toBe(true);
+  expect(Array.isArray(result.content)).toBe(true);
 });
 
-test("list-recipes returns proper structure", async (t) => {
+test("list-recipes returns proper structure", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -201,12 +201,12 @@ test("list-recipes returns proper structure", async (t) => {
   const result = await executor({ outputItem: undefined });
 
   const text = result.content[0].text.toLowerCase();
-  t.true(text.length > 0);
-  t.true(text.includes("stick"));
-  t.true(Array.isArray(result.content));
+  expect(text.length > 0).toBe(true);
+  expect(text.includes("stick")).toBe(true);
+  expect(Array.isArray(result.content)).toBe(true);
 });
 
-test("craft-item returns error when recipe not available", async (t) => {
+test("craft-item returns error when recipe not available", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -231,12 +231,12 @@ test("craft-item returns error when recipe not available", async (t) => {
 
   const result = await executor({ outputItem: "stick", amount: 1 });
 
-  t.true(result.content[0].text.length > 0);
-  t.true(!!result.isError);
-  t.true(Array.isArray(result.content));
+  expect(result.content[0].text.length > 0).toBe(true);
+  expect(!!result.isError).toBe(true);
+  expect(Array.isArray(result.content)).toBe(true);
 });
 
-test("craft-item crafts successfully when ingredients are available", async (t) => {
+test("craft-item crafts successfully when ingredients are available", async () => {
   const mcData = minecraftData("1.21.8");
   const recipes = flattenRecipes((mcData as unknown as { recipes: unknown }).recipes);
   const stickId = (mcData as unknown as { itemsByName: Record<string, { id: number }> }).itemsByName
@@ -248,7 +248,7 @@ test("craft-item crafts successfully when ingredients are available", async (t) 
     return !!result && typeof result.id === "number" && result.id === stickId;
   });
 
-  t.truthy(stickRecipe);
+  expect(stickRecipe).toBeTruthy();
 
   const ingredientCounts = countRecipeIngredients(mcData, stickRecipe);
   const inventoryItems = Object.entries(ingredientCounts).map(([name, count], idx) => ({
@@ -277,16 +277,16 @@ test("craft-item crafts successfully when ingredients are available", async (t) 
 
   const result = await executor({ outputItem: "stick", amount: 1 });
 
-  t.true(craftStub.called);
-  t.false(!!result.isError);
-  t.true(result.content[0].text.toLowerCase().includes("successfully crafted"));
+  expect(craftStub.called).toBe(true);
+  expect(!!result.isError).toBe(false);
+  expect(result.content[0].text.toLowerCase().includes("successfully crafted")).toBe(true);
 });
 
-test("uses real minecraft-data recipes for version 1.21.8", async (t) => {
+test("uses real minecraft-data recipes for version 1.21.8", async () => {
   const mcData = minecraftData("1.21.8");
 
-  t.truthy(mcData.recipes);
+  expect(mcData.recipes).toBeTruthy();
   const isValid =
     mcData.recipes && (Array.isArray(mcData.recipes) || typeof mcData.recipes === "object");
-  t.true(isValid);
+  expect(isValid).toBe(true);
 });

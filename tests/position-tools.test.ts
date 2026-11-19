@@ -1,4 +1,4 @@
-import test from "ava";
+import { test, expect } from "bun:test";
 import sinon from "sinon";
 import { registerPositionTools } from "../src/tools/position-tools.js";
 import { ToolFactory } from "../src/tool-factory.js";
@@ -7,7 +7,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type mineflayer from "mineflayer";
 import { Vec3 } from "vec3";
 
-test("registerPositionTools registers get-position tool", (t) => {
+test("registerPositionTools registers get-position tool", () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -23,11 +23,11 @@ test("registerPositionTools registers get-position tool", (t) => {
   const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
   const getPositionCall = toolCalls.find((call) => call.args[0] === "get-position");
 
-  t.truthy(getPositionCall);
-  t.is(getPositionCall!.args[1], "Get the current position of the bot");
+  expect(getPositionCall).toBeTruthy();
+  expect(getPositionCall!.args[1]).toBe("Get the current position of the bot");
 });
 
-test("registerPositionTools registers move-to-position tool", (t) => {
+test("registerPositionTools registers move-to-position tool", () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -43,11 +43,11 @@ test("registerPositionTools registers move-to-position tool", (t) => {
   const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
   const moveToPositionCall = toolCalls.find((call) => call.args[0] === "move-to-position");
 
-  t.truthy(moveToPositionCall);
-  t.is(moveToPositionCall!.args[1], "Move the bot to a specific position");
+  expect(moveToPositionCall).toBeTruthy();
+  expect(moveToPositionCall!.args[1]).toBe("Move the bot to a specific position");
 });
 
-test("get-position returns current bot position", async (t) => {
+test("get-position returns current bot position", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -71,12 +71,12 @@ test("get-position returns current bot position", async (t) => {
 
   const result = await executor({});
 
-  t.true(result.content[0].text.includes("100"));
-  t.true(result.content[0].text.includes("64"));
-  t.true(result.content[0].text.includes("200"));
+  expect(result.content[0].text.includes("100")).toBe(true);
+  expect(result.content[0].text.includes("64")).toBe(true);
+  expect(result.content[0].text.includes("200")).toBe(true);
 });
 
-test("move-to-position returns error when pathfinding fails", async (t) => {
+test("move-to-position returns error when pathfinding fails", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -104,46 +104,48 @@ test("move-to-position returns error when pathfinding fails", async (t) => {
 
   const result = await executor({ x: 100, y: 64, z: 200 });
 
-  t.true(result.isError);
-  t.true(result.content[0].text.includes("Cannot find path"));
+  expect(result.isError).toBe(true);
+  expect(result.content[0].text.includes("Cannot find path")).toBe(true);
 });
 
-test.serial("move-to-position returns timeout error and stops pathfinder", async (t) => {
+test("move-to-position returns timeout error and stops pathfinder", async () => {
   const clock = sinon.useFakeTimers();
-  t.teardown(() => clock.restore());
+  try {
+    const mockServer = {
+      tool: sinon.stub(),
+    } as unknown as McpServer;
+    const mockConnection = {
+      checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
+    } as unknown as BotConnection;
+    const factory = new ToolFactory(mockServer, mockConnection);
 
-  const mockServer = {
-    tool: sinon.stub(),
-  } as unknown as McpServer;
-  const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
-  } as unknown as BotConnection;
-  const factory = new ToolFactory(mockServer, mockConnection);
+    const mockBot = {
+      pathfinder: {
+        goto: sinon.stub().returns(new Promise(() => {})),
+        stop: sinon.stub(),
+      },
+    } as Partial<mineflayer.Bot>;
+    const getBot = () => mockBot as mineflayer.Bot;
 
-  const mockBot = {
-    pathfinder: {
-      goto: sinon.stub().returns(new Promise(() => {})),
-      stop: sinon.stub(),
-    },
-  } as Partial<mineflayer.Bot>;
-  const getBot = () => mockBot as mineflayer.Bot;
+    registerPositionTools(factory, getBot);
 
-  registerPositionTools(factory, getBot);
+    const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+    const moveToPositionCall = toolCalls.find((call) => call.args[0] === "move-to-position");
+    const executor = moveToPositionCall!.args[3];
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
-  const moveToPositionCall = toolCalls.find((call) => call.args[0] === "move-to-position");
-  const executor = moveToPositionCall!.args[3];
+    const resultPromise = executor({ x: 100, y: 64, z: 200, timeoutMs: 1000 });
+    await clock.tickAsync(1000);
+    const result = await resultPromise;
 
-  const resultPromise = executor({ x: 100, y: 64, z: 200, timeoutMs: 1000 });
-  await clock.tickAsync(1000);
-  const result = await resultPromise;
-
-  t.true(result.isError);
-  t.true(result.content[0].text.includes("Move timed out after 1000ms"));
-  t.true((mockBot.pathfinder!.stop as sinon.SinonStub).calledOnce);
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text.includes("Move timed out after 1000ms")).toBe(true);
+    expect((mockBot.pathfinder!.stop as sinon.SinonStub).calledOnce).toBe(true);
+  } finally {
+    clock.restore();
+  }
 });
 
-test("move-to-position succeeds without timeout and does not stop pathfinder", async (t) => {
+test("move-to-position succeeds without timeout and does not stop pathfinder", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -168,46 +170,48 @@ test("move-to-position succeeds without timeout and does not stop pathfinder", a
 
   const result = await executor({ x: 100, y: 64, z: 200 });
 
-  t.falsy(result.isError);
-  t.true(result.content[0].text.includes("Successfully moved"));
-  t.true((mockBot.pathfinder!.stop as sinon.SinonStub).notCalled);
+  expect(result.isError).toBeFalsy();
+  expect(result.content[0].text.includes("Successfully moved")).toBe(true);
+  expect((mockBot.pathfinder!.stop as sinon.SinonStub).notCalled).toBe(true);
 });
 
-test.serial("move-to-position succeeds before timeout and does not stop pathfinder", async (t) => {
+test("move-to-position succeeds before timeout and does not stop pathfinder", async () => {
   const clock = sinon.useFakeTimers();
-  t.teardown(() => clock.restore());
+  try {
+    const mockServer = {
+      tool: sinon.stub(),
+    } as unknown as McpServer;
+    const mockConnection = {
+      checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
+    } as unknown as BotConnection;
+    const factory = new ToolFactory(mockServer, mockConnection);
 
-  const mockServer = {
-    tool: sinon.stub(),
-  } as unknown as McpServer;
-  const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
-  } as unknown as BotConnection;
-  const factory = new ToolFactory(mockServer, mockConnection);
+    const mockBot = {
+      pathfinder: {
+        goto: sinon.stub().resolves(),
+        stop: sinon.stub(),
+      },
+    } as Partial<mineflayer.Bot>;
+    const getBot = () => mockBot as mineflayer.Bot;
 
-  const mockBot = {
-    pathfinder: {
-      goto: sinon.stub().resolves(),
-      stop: sinon.stub(),
-    },
-  } as Partial<mineflayer.Bot>;
-  const getBot = () => mockBot as mineflayer.Bot;
+    registerPositionTools(factory, getBot);
 
-  registerPositionTools(factory, getBot);
+    const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+    const moveToPositionCall = toolCalls.find((call) => call.args[0] === "move-to-position");
+    const executor = moveToPositionCall!.args[3];
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
-  const moveToPositionCall = toolCalls.find((call) => call.args[0] === "move-to-position");
-  const executor = moveToPositionCall!.args[3];
+    const result = await executor({ x: 100, y: 64, z: 200, timeoutMs: 1000 });
+    await clock.tickAsync(1000);
 
-  const result = await executor({ x: 100, y: 64, z: 200, timeoutMs: 1000 });
-  await clock.tickAsync(1000);
-
-  t.falsy(result.isError);
-  t.true(result.content[0].text.includes("Successfully moved"));
-  t.true((mockBot.pathfinder!.stop as sinon.SinonStub).notCalled);
+    expect(result.isError).toBeFalsy();
+    expect(result.content[0].text.includes("Successfully moved")).toBe(true);
+    expect((mockBot.pathfinder!.stop as sinon.SinonStub).notCalled).toBe(true);
+  } finally {
+    clock.restore();
+  }
 });
 
-test("move-to-position preserves pathfinder error when not timing out", async (t) => {
+test("move-to-position preserves pathfinder error when not timing out", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -238,7 +242,9 @@ test("move-to-position preserves pathfinder error when not timing out", async (t
 
   const result = await executor({ x: 100, y: 64, z: 200, timeoutMs: 5000 });
 
-  t.true(result.isError);
-  t.true(result.content[0].text.includes("Path was stopped before it could be completed"));
-  t.true((mockBot.pathfinder!.stop as sinon.SinonStub).notCalled);
+  expect(result.isError).toBe(true);
+  expect(result.content[0].text.includes("Path was stopped before it could be completed")).toBe(
+    true,
+  );
+  expect((mockBot.pathfinder!.stop as sinon.SinonStub).notCalled).toBe(true);
 });

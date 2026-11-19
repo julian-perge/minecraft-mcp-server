@@ -1,34 +1,34 @@
-import test from "ava";
+import { test, expect } from "bun:test";
 import sinon from "sinon";
 import { ToolFactory } from "../src/tool-factory.js";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { BotConnection } from "../src/bot-connection.js";
 
-test("createResponse returns proper MCP response format", (t) => {
+test("createResponse returns proper MCP response format", () => {
   const mockServer = {} as McpServer;
   const mockConnection = {} as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
 
   const response = factory.createResponse("Test message");
 
-  t.deepEqual(response, {
+  expect(response).toStrictEqual({
     content: [{ type: "text", text: "Test message" }],
   });
 });
 
-test("createResponse handles empty string", (t) => {
+test("createResponse handles empty string", () => {
   const mockServer = {} as McpServer;
   const mockConnection = {} as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
 
   const response = factory.createResponse("");
 
-  t.deepEqual(response, {
+  expect(response).toStrictEqual({
     content: [{ type: "text", text: "" }],
   });
 });
 
-test("createErrorResponse with Error object", (t) => {
+test("createErrorResponse with Error object", () => {
   const mockServer = {} as McpServer;
   const mockConnection = {} as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
@@ -36,36 +36,36 @@ test("createErrorResponse with Error object", (t) => {
   const error = new Error("Connection timeout");
   const response = factory.createErrorResponse(error);
 
-  t.deepEqual(response, {
+  expect(response).toStrictEqual({
     content: [{ type: "text", text: "Failed: Connection timeout" }],
     isError: true,
   });
 });
 
-test("createErrorResponse with string", (t) => {
+test("createErrorResponse with string", () => {
   const mockServer = {} as McpServer;
   const mockConnection = {} as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
 
   const response = factory.createErrorResponse("Invalid argument");
 
-  t.deepEqual(response, {
+  expect(response).toStrictEqual({
     content: [{ type: "text", text: "Failed: Invalid argument" }],
     isError: true,
   });
 });
 
-test("createErrorResponse includes isError flag", (t) => {
+test("createErrorResponse includes isError flag", () => {
   const mockServer = {} as McpServer;
   const mockConnection = {} as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
 
   const response = factory.createErrorResponse("Error occurred");
 
-  t.true(response.isError === true);
+  expect(response.isError === true).toBe(true);
 });
 
-test("registerTool calls server.tool with correct parameters", async (t) => {
+test("registerTool calls server.tool with correct parameters", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -79,13 +79,13 @@ test("registerTool calls server.tool with correct parameters", async (t) => {
 
   factory.registerTool("test_tool", "A test tool", schema, executor);
 
-  t.true((mockServer.tool as sinon.SinonStub).calledOnce);
-  t.is((mockServer.tool as sinon.SinonStub).firstCall.args[0], "test_tool");
-  t.is((mockServer.tool as sinon.SinonStub).firstCall.args[1], "A test tool");
-  t.is((mockServer.tool as sinon.SinonStub).firstCall.args[2], schema);
+  expect((mockServer.tool as sinon.SinonStub).calledOnce).toBe(true);
+  expect((mockServer.tool as sinon.SinonStub).firstCall.args[0]).toBe("test_tool");
+  expect((mockServer.tool as sinon.SinonStub).firstCall.args[1]).toBe("A test tool");
+  expect((mockServer.tool as sinon.SinonStub).firstCall.args[2]).toBe(schema);
 });
 
-test("registerTool executor checks connection before executing", async (t) => {
+test("registerTool executor checks connection before executing", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -101,10 +101,10 @@ test("registerTool executor checks connection before executing", async (t) => {
   const registeredExecutor = (mockServer.tool as sinon.SinonStub).firstCall.args[3];
   await registeredExecutor({ arg: "value" });
 
-  t.true((mockConnection.checkConnectionAndReconnect as sinon.SinonStub).calledOnce);
+  expect((mockConnection.checkConnectionAndReconnect as sinon.SinonStub).calledOnce).toBe(true);
 });
 
-test("registerTool executor returns error when not connected", async (t) => {
+test("registerTool executor returns error when not connected", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -123,14 +123,14 @@ test("registerTool executor returns error when not connected", async (t) => {
   const registeredExecutor = (mockServer.tool as sinon.SinonStub).firstCall.args[3];
   const response = await registeredExecutor({ arg: "value" });
 
-  t.deepEqual(response, {
+  expect(response).toStrictEqual({
     content: [{ type: "text", text: "Bot is not connected" }],
     isError: true,
   });
-  t.true((executor as sinon.SinonStub).notCalled);
+  expect((executor as sinon.SinonStub).notCalled).toBe(true);
 });
 
-test("registerTool executor calls executor when connected", async (t) => {
+test("registerTool executor calls executor when connected", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -147,10 +147,10 @@ test("registerTool executor calls executor when connected", async (t) => {
   const args = { arg: "value" };
   await registeredExecutor(args);
 
-  t.true((executor as sinon.SinonStub).calledOnceWith(args));
+  expect((executor as sinon.SinonStub).calledOnceWith(args)).toBe(true);
 });
 
-test("registerTool executor returns executor result when successful", async (t) => {
+test("registerTool executor returns executor result when successful", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -167,10 +167,10 @@ test("registerTool executor returns executor result when successful", async (t) 
   const registeredExecutor = (mockServer.tool as sinon.SinonStub).firstCall.args[3];
   const response = await registeredExecutor({ arg: "value" });
 
-  t.deepEqual(response, expectedResponse);
+  expect(response).toStrictEqual(expectedResponse);
 });
 
-test("registerTool executor catches and returns error response on exception", async (t) => {
+test("registerTool executor catches and returns error response on exception", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -187,7 +187,7 @@ test("registerTool executor catches and returns error response on exception", as
   const registeredExecutor = (mockServer.tool as sinon.SinonStub).firstCall.args[3];
   const response = await registeredExecutor({ arg: "value" });
 
-  t.deepEqual(response, {
+  expect(response).toStrictEqual({
     content: [{ type: "text", text: "Failed: Execution failed" }],
     isError: true,
   });

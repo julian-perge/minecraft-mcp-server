@@ -9,8 +9,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/main.js",
-    "dev": "tsx src/main.ts",
-    "test": "ava",
+    "dev": "tsc -p tsconfig.build.json && node dist/main.js",
+    "test": "bun test",
     "check:types": "bun check",
     "lint": "oxlint --deny-warnings",
     "fmt": "oxfmt"
@@ -25,26 +25,15 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@ava/typescript": "^6.0.0",
+    "@types/bun": "1.4.4",
     "@types/node": "^25.2.3",
     "@types/sinon": "^21.0.0",
     "@types/vec3": "^0.1.4",
     "@types/yargs": "^17.0.35",
-    "ava": "^6.4.1",
     "oxfmt": "0.79.0",
     "oxlint": "1.94.0",
     "sinon": "^21.0.1",
-    "ts-node": "^10.9.2",
-    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
-  },
-  "ava": {
-    "extensions": [
-      "ts"
-    ],
-    "nodeArguments": [
-      "--import=tsx"
-    ]
   },
   "engines": {
     "node": ">=22"

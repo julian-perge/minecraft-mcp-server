@@ -1,4 +1,4 @@
-import test from "ava";
+import { test, expect } from "bun:test";
 import sinon from "sinon";
 import { registerChatTools } from "../src/tools/chat-tools.js";
 import { ToolFactory } from "../src/tool-factory.js";
@@ -7,7 +7,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { BotConnection } from "../src/bot-connection.js";
 import type mineflayer from "mineflayer";
 
-test("registerChatTools registers send-chat tool", (t) => {
+test("registerChatTools registers send-chat tool", () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -24,11 +24,11 @@ test("registerChatTools registers send-chat tool", (t) => {
   const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
   const sendChatCall = toolCalls.find((call) => call.args[0] === "send-chat");
 
-  t.truthy(sendChatCall);
-  t.is(sendChatCall!.args[1], "Send a chat message in-game");
+  expect(sendChatCall).toBeTruthy();
+  expect(sendChatCall!.args[1]).toBe("Send a chat message in-game");
 });
 
-test("registerChatTools registers read-chat tool", (t) => {
+test("registerChatTools registers read-chat tool", () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -45,11 +45,11 @@ test("registerChatTools registers read-chat tool", (t) => {
   const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
   const readChatCall = toolCalls.find((call) => call.args[0] === "read-chat");
 
-  t.truthy(readChatCall);
-  t.is(readChatCall!.args[1], "Get recent chat messages from players");
+  expect(readChatCall).toBeTruthy();
+  expect(readChatCall!.args[1]).toBe("Get recent chat messages from players");
 });
 
-test("send-chat calls bot.chat with message", async (t) => {
+test("send-chat calls bot.chat with message", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -72,11 +72,11 @@ test("send-chat calls bot.chat with message", async (t) => {
 
   const result = await executor({ message: "Hello world" });
 
-  t.true((mockBot.chat as sinon.SinonStub).calledOnceWith("Hello world"));
-  t.true(result.content[0].text.includes("Hello world"));
+  expect((mockBot.chat as sinon.SinonStub).calledOnceWith("Hello world")).toBe(true);
+  expect(result.content[0].text.includes("Hello world")).toBe(true);
 });
 
-test("read-chat returns no messages when empty", async (t) => {
+test("read-chat returns no messages when empty", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -97,10 +97,10 @@ test("read-chat returns no messages when empty", async (t) => {
 
   const result = await executor({});
 
-  t.true(result.content[0].text.includes("No chat messages found"));
+  expect(result.content[0].text.includes("No chat messages found")).toBe(true);
 });
 
-test("read-chat returns formatted messages", async (t) => {
+test("read-chat returns formatted messages", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -124,14 +124,14 @@ test("read-chat returns formatted messages", async (t) => {
 
   const result = await executor({ count: 10 });
 
-  t.true(result.content[0].text.includes("player1"));
-  t.true(result.content[0].text.includes("Hello"));
-  t.true(result.content[0].text.includes("player2"));
-  t.true(result.content[0].text.includes("Hi there"));
-  t.true(result.content[0].text.includes("2 chat message"));
+  expect(result.content[0].text.includes("player1")).toBe(true);
+  expect(result.content[0].text.includes("Hello")).toBe(true);
+  expect(result.content[0].text.includes("player2")).toBe(true);
+  expect(result.content[0].text.includes("Hi there")).toBe(true);
+  expect(result.content[0].text.includes("2 chat message")).toBe(true);
 });
 
-test("read-chat respects count parameter", async (t) => {
+test("read-chat respects count parameter", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -156,10 +156,10 @@ test("read-chat respects count parameter", async (t) => {
 
   const result = await executor({ count: 5 });
 
-  t.true(result.content[0].text.includes("5 chat message"));
+  expect(result.content[0].text.includes("5 chat message")).toBe(true);
 });
 
-test("read-chat limits count to max messages", async (t) => {
+test("read-chat limits count to max messages", async () => {
   const mockServer = {
     tool: sinon.stub(),
   } as unknown as McpServer;
@@ -184,5 +184,5 @@ test("read-chat limits count to max messages", async (t) => {
 
   const result = await executor({ count: 200 });
 
-  t.true(result.content[0].text.includes("10 chat message"));
+  expect(result.content[0].text.includes("10 chat message")).toBe(true);
 });
