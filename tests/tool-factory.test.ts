@@ -1,194 +1,183 @@
-import test from 'ava';
-import sinon from 'sinon';
-import { ToolFactory } from '../src/tool-factory.js';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { BotConnection } from '../src/bot-connection.js';
+import { test, expect } from "bun:test";
+import sinon from "sinon";
+import { z } from "zod";
+import { ToolFactory } from "../src/tool-factory.js";
+import { connectTools, textOf } from "./helpers/mcp-client.js";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { BotConnection } from "../src/bot-connection.js";
 
-test('createResponse returns proper MCP response format', (t) => {
+test("createResponse returns proper MCP response format", () => {
   const mockServer = {} as McpServer;
   const mockConnection = {} as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
 
-  const response = factory.createResponse('Test message');
+  const response = factory.createResponse("Test message");
 
-  t.deepEqual(response, {
-    content: [{ type: 'text', text: 'Test message' }]
+  expect(response).toStrictEqual({
+    content: [{ type: "text", text: "Test message" }],
   });
 });
 
-test('createResponse handles empty string', (t) => {
+test("createResponse handles empty string", () => {
   const mockServer = {} as McpServer;
   const mockConnection = {} as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
 
-  const response = factory.createResponse('');
+  const response = factory.createResponse("");
 
-  t.deepEqual(response, {
-    content: [{ type: 'text', text: '' }]
+  expect(response).toStrictEqual({
+    content: [{ type: "text", text: "" }],
   });
 });
 
-test('createErrorResponse with Error object', (t) => {
+test("createErrorResponse with Error object", () => {
   const mockServer = {} as McpServer;
   const mockConnection = {} as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
 
-  const error = new Error('Connection timeout');
+  const error = new Error("Connection timeout");
   const response = factory.createErrorResponse(error);
 
-  t.deepEqual(response, {
-    content: [{ type: 'text', text: 'Failed: Connection timeout' }],
-    isError: true
+  expect(response).toStrictEqual({
+    content: [{ type: "text", text: "Failed: Connection timeout" }],
+    isError: true,
   });
 });
 
-test('createErrorResponse with string', (t) => {
+test("createErrorResponse with string", () => {
   const mockServer = {} as McpServer;
   const mockConnection = {} as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
 
-  const response = factory.createErrorResponse('Invalid argument');
+  const response = factory.createErrorResponse("Invalid argument");
 
-  t.deepEqual(response, {
-    content: [{ type: 'text', text: 'Failed: Invalid argument' }],
-    isError: true
+  expect(response).toStrictEqual({
+    content: [{ type: "text", text: "Failed: Invalid argument" }],
+    isError: true,
   });
 });
 
-test('createErrorResponse includes isError flag', (t) => {
+test("createErrorResponse includes isError flag", () => {
   const mockServer = {} as McpServer;
   const mockConnection = {} as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
 
-  const response = factory.createErrorResponse('Error occurred');
+  const response = factory.createErrorResponse("Error occurred");
 
-  t.true(response.isError === true);
+  expect(response.isError === true).toBe(true);
 });
 
-test('registerTool calls server.tool with correct parameters', async (t) => {
-  const mockServer = {
-    tool: sinon.stub()
-  } as unknown as McpServer;
-  const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
-  } as unknown as BotConnection;
+test("registerTool registers the tool with its description and input schema", async () => {
+  const tools = await connectTools((factory) =>
+    factory.registerTool(
+      "test_tool",
+      "A test tool",
+      { count: z.number().describe("How many") },
+      async () => factory.createResponse("ok"),
+    ),
+  );
 
-  const factory = new ToolFactory(mockServer, mockConnection);
-  const schema = { type: 'object', properties: {} };
-  const executor = sinon.stub().resolves({ content: [{ type: 'text', text: 'Success' }] });
+  const { tools: listed } = await tools.listTools();
 
-  factory.registerTool('test_tool', 'A test tool', schema, executor);
-
-  t.true((mockServer.tool as sinon.SinonStub).calledOnce);
-  t.is((mockServer.tool as sinon.SinonStub).firstCall.args[0], 'test_tool');
-  t.is((mockServer.tool as sinon.SinonStub).firstCall.args[1], 'A test tool');
-  t.is((mockServer.tool as sinon.SinonStub).firstCall.args[2], schema);
+  expect(listed).toHaveLength(1);
+  expect(listed[0].name).toBe("test_tool");
+  expect(listed[0].description).toBe("A test tool");
+  expect(listed[0].inputSchema.properties).toHaveProperty("count");
+  await tools.close();
 });
 
-test('registerTool executor checks connection before executing', async (t) => {
-  const mockServer = {
-    tool: sinon.stub()
-  } as unknown as McpServer;
-  const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
-  } as unknown as BotConnection;
+test("registerTool checks the connection before it runs the executor", async () => {
+  const executor = sinon.stub().resolves({ content: [{ type: "text", text: "Success" }] });
+  const tools = await connectTools((factory) =>
+    factory.registerTool("test_tool", "A test tool", {}, executor),
+  );
 
-  const factory = new ToolFactory(mockServer, mockConnection);
-  const executor = sinon.stub().resolves({ content: [{ type: 'text', text: 'Success' }] });
+  await tools.call("test_tool");
 
-  factory.registerTool('test_tool', 'A test tool', {}, executor);
-
-  const registeredExecutor = (mockServer.tool as sinon.SinonStub).firstCall.args[3];
-  await registeredExecutor({ arg: 'value' });
-
-  t.true((mockConnection.checkConnectionAndReconnect as sinon.SinonStub).calledOnce);
+  expect((tools.connection.checkConnectionAndReconnect as sinon.SinonStub).calledOnce).toBe(true);
+  expect(executor.calledOnce).toBe(true);
+  await tools.close();
 });
 
-test('registerTool executor returns error when not connected', async (t) => {
-  const mockServer = {
-    tool: sinon.stub()
-  } as unknown as McpServer;
-  const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({
-      connected: false,
-      message: 'Bot is not connected'
-    })
-  } as unknown as BotConnection;
+test("registerTool returns the connection message and skips the executor when not connected", async () => {
+  const executor = sinon.stub().resolves({ content: [{ type: "text", text: "Success" }] });
+  const tools = await connectTools(
+    (factory) => factory.registerTool("test_tool", "A test tool", {}, executor),
+    { connected: false, message: "Bot is not connected" },
+  );
 
-  const factory = new ToolFactory(mockServer, mockConnection);
-  const executor = sinon.stub().resolves({ content: [{ type: 'text', text: 'Success' }] });
+  const response = await tools.call("test_tool");
 
-  factory.registerTool('test_tool', 'A test tool', {}, executor);
-
-  const registeredExecutor = (mockServer.tool as sinon.SinonStub).firstCall.args[3];
-  const response = await registeredExecutor({ arg: 'value' });
-
-  t.deepEqual(response, {
-    content: [{ type: 'text', text: 'Bot is not connected' }],
-    isError: true
-  });
-  t.true((executor as sinon.SinonStub).notCalled);
+  expect(response.isError).toBe(true);
+  expect(textOf(response)).toBe("Bot is not connected");
+  expect(executor.notCalled).toBe(true);
+  await tools.close();
 });
 
-test('registerTool executor calls executor when connected', async (t) => {
-  const mockServer = {
-    tool: sinon.stub()
-  } as unknown as McpServer;
-  const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
-  } as unknown as BotConnection;
+test("registerTool passes the parsed arguments to the executor", async () => {
+  const executor = sinon.stub().resolves({ content: [{ type: "text", text: "Success" }] });
+  const tools = await connectTools((factory) =>
+    factory.registerTool(
+      "test_tool",
+      "A test tool",
+      { x: z.coerce.number(), name: z.string() },
+      executor,
+    ),
+  );
 
-  const factory = new ToolFactory(mockServer, mockConnection);
-  const executor = sinon.stub().resolves({ content: [{ type: 'text', text: 'Success' }] });
+  await tools.call("test_tool", { x: "12", name: "stone" });
 
-  factory.registerTool('test_tool', 'A test tool', {}, executor);
-
-  const registeredExecutor = (mockServer.tool as sinon.SinonStub).firstCall.args[3];
-  const args = { arg: 'value' };
-  await registeredExecutor(args);
-
-  t.true((executor as sinon.SinonStub).calledOnceWith(args));
+  expect(executor.firstCall.args[0]).toStrictEqual({ x: 12, name: "stone" });
+  await tools.close();
 });
 
-test('registerTool executor returns executor result when successful', async (t) => {
-  const mockServer = {
-    tool: sinon.stub()
-  } as unknown as McpServer;
-  const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
-  } as unknown as BotConnection;
+test("registerTool returns the executor result when it succeeds", async () => {
+  const tools = await connectTools((factory) =>
+    factory.registerTool("test_tool", "A test tool", {}, async () =>
+      factory.createResponse("Tool executed"),
+    ),
+  );
 
-  const factory = new ToolFactory(mockServer, mockConnection);
-  const expectedResponse = { content: [{ type: 'text', text: 'Tool executed' }] };
-  const executor = sinon.stub().resolves(expectedResponse);
+  const response = await tools.call("test_tool");
 
-  factory.registerTool('test_tool', 'A test tool', {}, executor);
-
-  const registeredExecutor = (mockServer.tool as sinon.SinonStub).firstCall.args[3];
-  const response = await registeredExecutor({ arg: 'value' });
-
-  t.deepEqual(response, expectedResponse);
+  expect(response.isError).toBeFalsy();
+  expect(textOf(response)).toBe("Tool executed");
+  await tools.close();
 });
 
-test('registerTool executor catches and returns error response on exception', async (t) => {
-  const mockServer = {
-    tool: sinon.stub()
-  } as unknown as McpServer;
-  const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
-  } as unknown as BotConnection;
+test("registerTool turns an executor exception into an error response", async () => {
+  const tools = await connectTools((factory) =>
+    factory.registerTool(
+      "test_tool",
+      "A test tool",
+      {},
+      sinon.stub().rejects(new Error("Execution failed")),
+    ),
+  );
 
-  const factory = new ToolFactory(mockServer, mockConnection);
-  const error = new Error('Execution failed');
-  const executor = sinon.stub().rejects(error);
+  const response = await tools.call("test_tool");
 
-  factory.registerTool('test_tool', 'A test tool', {}, executor);
+  expect(response.isError).toBe(true);
+  expect(textOf(response)).toBe("Failed: Execution failed");
+  await tools.close();
+});
 
-  const registeredExecutor = (mockServer.tool as sinon.SinonStub).firstCall.args[3];
-  const response = await registeredExecutor({ arg: 'value' });
+test("registerTool rejects invalid arguments before the executor runs", async () => {
+  const executor = sinon.stub().resolves({ content: [{ type: "text", text: "Success" }] });
+  const tools = await connectTools((factory) =>
+    factory.registerTool(
+      "test_tool",
+      "A test tool",
+      { count: z.number().int().positive() },
+      executor,
+    ),
+  );
 
-  t.deepEqual(response, {
-    content: [{ type: 'text', text: 'Failed: Execution failed' }],
-    isError: true
-  });
+  const response = await tools.call("test_tool", { count: 0 });
+
+  expect(response.isError).toBe(true);
+  expect(textOf(response)).toContain("Invalid arguments for tool test_tool");
+  expect(textOf(response)).toContain("count");
+  expect(executor.notCalled).toBe(true);
+  await tools.close();
 });

@@ -1,55 +1,41 @@
 {
   "name": "minecraft-mcp-server",
   "version": "2.0.4",
-  "type": "module",
-  "main": "dist/main.js",
   "bin": {
     "minecraft-mcp-server": "dist/main.js"
   },
-  "ava": {
-    "extensions": [
-      "ts"
-    ],
-    "nodeArguments": [
-      "--import=tsx"
-    ]
-  },
+  "type": "module",
+  "main": "dist/main.js",
   "scripts": {
-    "dev": "tsx src/main.ts",
     "build": "tsc -p tsconfig.build.json",
-    "prepare": "npm run build",
     "start": "node dist/main.js",
-    "test": "ava",
-    "lint": "eslint \"{src,tests}/**/*.ts\"",
-    "lint:fix": "eslint \"{src,tests}/**/*.ts\" --fix"
+    "dev": "tsc -p tsconfig.build.json && node dist/main.js",
+    "test": "bun test",
+    "check:types": "bun check",
+    "lint": "oxlint --deny-warnings",
+    "fmt": "oxfmt"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.27.1",
-    "minecraft-data": "^3.105.0",
-    "mineflayer": "^4.35.0",
-    "mineflayer-pathfinder": "^2.4.2",
-    "vec3": "^0.1.8",
-    "yargs": "^18.0.0",
-    "zod": "^3.25.76"
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "minecraft-data": "^3.119.0",
+    "mineflayer": "^4.39.0",
+    "mineflayer-pathfinder": "^2.4.5",
+    "vec3": "^0.1.10",
+    "yargs": "^18.2.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@ava/typescript": "^6.0.0",
-    "@types/node": "^25.2.3",
-    "@types/sinon": "^21.0.0",
-    "@types/vec3": "^0.1.4",
-    "@types/yargs": "^17.0.35",
-    "@typescript-eslint/eslint-plugin": "^8.55.0",
-    "@typescript-eslint/parser": "^8.56.1",
-    "ava": "^6.4.1",
-    "eslint": "^9.39.2",
-    "eslint-plugin-ava": "^15.1.0",
-    "globals": "^17.3.0",
-    "sinon": "^21.0.1",
-    "ts-node": "^10.9.2",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "@types/bun": "1.4.4",
+    "@types/node": "26.6.6",
+    "@types/sinon": "22.0.2",
+    "@types/yargs": "17.0.35",
+    "oxfmt": "0.79.0",
+    "oxlint": "1.94.0",
+    "sinon": "22.1.0",
+    "typescript": "7.0.2"
   },
   "engines": {
-    "node": ">=20.10.0"
-  }
+    "node": ">=22"
+  },
+  "packageManager": "bun@1.4.4"
 }

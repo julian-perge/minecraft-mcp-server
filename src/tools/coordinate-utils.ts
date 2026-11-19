@@ -1,4 +1,8 @@
-export function coerceCoordinates(x: number, y: number, z: number): { x: number; y: number; z: number } {
+export function coerceCoordinates(
+  x: number,
+  y: number,
+  z: number,
+): { x: number; y: number; z: number } {
   const coercedX = Number(x);
   const coercedY = Number(y);
   const coercedZ = Number(z);

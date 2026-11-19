@@ -1,17 +1,17 @@
-import test from 'ava';
-import sinon from 'sinon';
-import { registerGameStateTools } from '../src/tools/gamestate-tools.js';
-import { ToolFactory } from '../src/tool-factory.js';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { BotConnection } from '../src/bot-connection.js';
-import type mineflayer from 'mineflayer';
+import { test, expect } from "bun:test";
+import sinon from "sinon";
+import { registerGameStateTools } from "../src/tools/gamestate-tools.js";
+import { ToolFactory } from "../src/tool-factory.js";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { BotConnection } from "../src/bot-connection.js";
+import type mineflayer from "mineflayer";
 
-test('registerGameStateTools registers detect-gamemode tool', (t) => {
+test("registerGameStateTools registers detect-gamemode tool", () => {
   const mockServer = {
-    tool: sinon.stub()
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
+    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
   const mockBot = {} as Partial<mineflayer.Bot>;
@@ -19,90 +19,90 @@ test('registerGameStateTools registers detect-gamemode tool', (t) => {
 
   registerGameStateTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
-  const detectGamemodeCall = toolCalls.find(call => call.args[0] === 'detect-gamemode');
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
+  const detectGamemodeCall = toolCalls.find((call) => call.args[0] === "detect-gamemode");
 
-  t.truthy(detectGamemodeCall);
-  t.is(detectGamemodeCall!.args[1], 'Detect the gamemode on game');
+  expect(detectGamemodeCall).toBeTruthy();
+  expect(detectGamemodeCall!.args[1].description).toBe("Detect the gamemode on game");
 });
 
-test('detect-gamemode returns creative mode', async (t) => {
+test("detect-gamemode returns creative mode", async () => {
   const mockServer = {
-    tool: sinon.stub()
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
+    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
 
   const mockBot = {
     game: {
-      gameMode: 'creative'
-    }
+      gameMode: "creative",
+    },
   } as Partial<mineflayer.Bot>;
   const getBot = () => mockBot as mineflayer.Bot;
 
   registerGameStateTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
-  const detectGamemodeCall = toolCalls.find(call => call.args[0] === 'detect-gamemode');
-  const executor = detectGamemodeCall!.args[3];
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
+  const detectGamemodeCall = toolCalls.find((call) => call.args[0] === "detect-gamemode");
+  const executor = detectGamemodeCall!.args[2];
 
   const result = await executor({});
 
-  t.true(result.content[0].text.includes('creative'));
+  expect(result.content[0].text.includes("creative")).toBe(true);
 });
 
-test('detect-gamemode returns survival mode', async (t) => {
+test("detect-gamemode returns survival mode", async () => {
   const mockServer = {
-    tool: sinon.stub()
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
+    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
 
   const mockBot = {
     game: {
-      gameMode: 'survival'
-    }
+      gameMode: "survival",
+    },
   } as Partial<mineflayer.Bot>;
   const getBot = () => mockBot as mineflayer.Bot;
 
   registerGameStateTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
-  const detectGamemodeCall = toolCalls.find(call => call.args[0] === 'detect-gamemode');
-  const executor = detectGamemodeCall!.args[3];
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
+  const detectGamemodeCall = toolCalls.find((call) => call.args[0] === "detect-gamemode");
+  const executor = detectGamemodeCall!.args[2];
 
   const result = await executor({});
 
-  t.true(result.content[0].text.includes('survival'));
+  expect(result.content[0].text.includes("survival")).toBe(true);
 });
 
-test('detect-gamemode returns adventure mode', async (t) => {
+test("detect-gamemode returns adventure mode", async () => {
   const mockServer = {
-    tool: sinon.stub()
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
+    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
 
   const mockBot = {
     game: {
-      gameMode: 'adventure'
-    }
+      gameMode: "adventure",
+    },
   } as Partial<mineflayer.Bot>;
   const getBot = () => mockBot as mineflayer.Bot;
 
   registerGameStateTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
-  const detectGamemodeCall = toolCalls.find(call => call.args[0] === 'detect-gamemode');
-  const executor = detectGamemodeCall!.args[3];
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
+  const detectGamemodeCall = toolCalls.find((call) => call.args[0] === "detect-gamemode");
+  const executor = detectGamemodeCall!.args[2];
 
   const result = await executor({});
 
-  t.true(result.content[0].text.includes('adventure'));
+  expect(result.content[0].text.includes("adventure")).toBe(true);
 });

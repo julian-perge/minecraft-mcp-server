@@ -1,6 +1,6 @@
 # Local shortcuts for checking, building and running the MCP server. `just` lists them, and `just <recipe>` runs one.
 #
-# CI does not call just. .github/workflows/build.yml runs ESLint, tsc, the tests and the build with npm directly, and does not run the prek hooks.
+# CI does not call just. .github/workflows/build.yml runs oxlint, the type check, the tests and the build with bun directly, and does not run the prek hooks.
 
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
@@ -25,42 +25,44 @@ require +tools:
         exit 1
     fi
 
+# The lint recipe runs the type check too, through the bun-check hook in prek.toml.
 [doc('Run the gate that proves a change: lint, type check, unit tests and build')]
 [group('check')]
-check: lint typecheck test build
+check: lint test build
 
 [doc('Run the prek hooks in prek.toml on every file, and show the diff of any file they fix')]
 [group('check')]
-lint: (require "prek" "npx")
+lint: (require "prek" "bun")
     prek run --all-files --show-diff-on-failure
 
 # A fixer hook exits 1 when it changes a file, so the second run fails only when a problem is left that no hook can fix.
 [doc('Run the prek hooks and keep the fixes they make')]
 [group('check')]
-fmt: (require "prek" "npx")
+fmt: (require "prek" "bun")
     prek run --all-files || prek run --all-files
 
 [doc('Type-check src and tests')]
 [group('check')]
-typecheck: (require "npx")
-    npx tsc --noEmit
+typecheck: (require "bun")
+    bun check
 
 [doc('Run the unit tests, or the given test files')]
 [group('check')]
-test *files: (require "npm")
-    npm test -- "$@"
+test *files: (require "bun")
+    bun run test "$@"
 
 [doc('Compile src into dist/')]
 [group('build')]
-build: (require "npm")
-    npm run build
+build: (require "bun")
+    bun run build
 
 [doc('Start the server from source, for example: just dev --port 25566')]
 [group('run')]
-dev *args: (require "npm")
-    npm run dev -- "$@"
+dev *args: (require "bun" "node")
+    bun run dev "$@"
 
-[doc('Install the dependencies from package-lock.json')]
+# bun.lock is the only lockfile (docs/adr/0002-bun-is-the-only-package-manager.md), so install never resolves new versions.
+[doc('Install the dependencies from bun.lock')]
 [group('setup')]
-install: (require "npm")
-    npm ci
+install: (require "bun")
+    bun install --frozen-lockfile

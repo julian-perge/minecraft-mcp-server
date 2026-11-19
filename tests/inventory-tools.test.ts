@@ -1,17 +1,17 @@
-import test from 'ava';
-import sinon from 'sinon';
-import { registerInventoryTools } from '../src/tools/inventory-tools.js';
-import { ToolFactory } from '../src/tool-factory.js';
-import { BotConnection } from '../src/bot-connection.js';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type mineflayer from 'mineflayer';
+import { test, expect } from "bun:test";
+import sinon from "sinon";
+import { registerInventoryTools } from "../src/tools/inventory-tools.js";
+import { ToolFactory } from "../src/tool-factory.js";
+import { BotConnection } from "../src/bot-connection.js";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type mineflayer from "mineflayer";
 
-test('registerInventoryTools registers list-inventory tool', (t) => {
+test("registerInventoryTools registers list-inventory tool", () => {
   const mockServer = {
-    tool: sinon.stub()
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
+    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
   const mockBot = {} as Partial<mineflayer.Bot>;
@@ -19,19 +19,19 @@ test('registerInventoryTools registers list-inventory tool', (t) => {
 
   registerInventoryTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
-  const listInventoryCall = toolCalls.find(call => call.args[0] === 'list-inventory');
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
+  const listInventoryCall = toolCalls.find((call) => call.args[0] === "list-inventory");
 
-  t.truthy(listInventoryCall);
-  t.is(listInventoryCall!.args[1], 'List all items in the bot\'s inventory');
+  expect(listInventoryCall).toBeTruthy();
+  expect(listInventoryCall!.args[1].description).toBe("List all items in the bot's inventory");
 });
 
-test('registerInventoryTools registers equip-item tool', (t) => {
+test("registerInventoryTools registers equip-item tool", () => {
   const mockServer = {
-    tool: sinon.stub()
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
+    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
   const mockBot = {} as Partial<mineflayer.Bot>;
@@ -39,128 +39,126 @@ test('registerInventoryTools registers equip-item tool', (t) => {
 
   registerInventoryTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
-  const equipItemCall = toolCalls.find(call => call.args[0] === 'equip-item');
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
+  const equipItemCall = toolCalls.find((call) => call.args[0] === "equip-item");
 
-  t.truthy(equipItemCall);
-  t.is(equipItemCall!.args[1], 'Equip a specific item');
+  expect(equipItemCall).toBeTruthy();
+  expect(equipItemCall!.args[1].description).toBe("Equip a specific item");
 });
 
-test('list-inventory returns empty when no items', async (t) => {
+test("list-inventory returns empty when no items", async () => {
   const mockServer = {
-    tool: sinon.stub()
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
+    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
 
   const mockBot = {
     inventory: {
-      items: () => []
-    }
+      items: () => [],
+    },
   } as unknown as mineflayer.Bot;
   const getBot = () => mockBot;
 
   registerInventoryTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
-  const listInventoryCall = toolCalls.find(call => call.args[0] === 'list-inventory');
-  const executor = listInventoryCall!.args[3];
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
+  const listInventoryCall = toolCalls.find((call) => call.args[0] === "list-inventory");
+  const executor = listInventoryCall!.args[2];
 
   const result = await executor({});
 
-  t.true(result.content[0].text.includes('empty'));
+  expect(result.content[0].text.includes("empty")).toBe(true);
 });
 
-test('list-inventory returns items with counts', async (t) => {
+test("list-inventory returns items with counts", async () => {
   const mockServer = {
-    tool: sinon.stub()
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
+    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
 
   const mockBot = {
     inventory: {
       items: () => [
-        { name: 'diamond_pickaxe', count: 1, slot: 0 },
-        { name: 'cobblestone', count: 64, slot: 1 }
-      ]
-    }
+        { name: "diamond_pickaxe", count: 1, slot: 0 },
+        { name: "cobblestone", count: 64, slot: 1 },
+      ],
+    },
   } as unknown as mineflayer.Bot;
   const getBot = () => mockBot;
 
   registerInventoryTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
-  const listInventoryCall = toolCalls.find(call => call.args[0] === 'list-inventory');
-  const executor = listInventoryCall!.args[3];
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
+  const listInventoryCall = toolCalls.find((call) => call.args[0] === "list-inventory");
+  const executor = listInventoryCall!.args[2];
 
   const result = await executor({});
 
-  t.true(result.content[0].text.includes('diamond_pickaxe'));
-  t.true(result.content[0].text.includes('cobblestone'));
-  t.true(result.content[0].text.includes('64'));
+  expect(result.content[0].text.includes("diamond_pickaxe")).toBe(true);
+  expect(result.content[0].text.includes("cobblestone")).toBe(true);
+  expect(result.content[0].text.includes("64")).toBe(true);
 });
 
-test('equip-item calls bot.equip', async (t) => {
+test("equip-item calls bot.equip", async () => {
   const mockServer = {
-    tool: sinon.stub()
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
+    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
 
   const equipStub = sinon.stub().resolves();
   const mockBot = {
     inventory: {
-      items: () => [
-        { name: 'diamond_sword', type: 1 }
-      ]
+      items: () => [{ name: "diamond_sword", type: 1 }],
     },
-    equip: equipStub
+    equip: equipStub,
   } as unknown as mineflayer.Bot;
   const getBot = () => mockBot;
 
   registerInventoryTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
-  const equipItemCall = toolCalls.find(call => call.args[0] === 'equip-item');
-  const executor = equipItemCall!.args[3];
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
+  const equipItemCall = toolCalls.find((call) => call.args[0] === "equip-item");
+  const executor = equipItemCall!.args[2];
 
-  const result = await executor({ itemName: 'diamond_sword', destination: 'hand' });
+  const result = await executor({ itemName: "diamond_sword", destination: "hand" });
 
-  t.true(equipStub.calledOnce);
-  t.true(result.content[0].text.includes('Equipped'));
-  t.true(result.content[0].text.includes('diamond_sword'));
+  expect(equipStub.calledOnce).toBe(true);
+  expect(result.content[0].text.includes("Equipped")).toBe(true);
+  expect(result.content[0].text.includes("diamond_sword")).toBe(true);
 });
 
-test('equip-item returns message when item not found', async (t) => {
+test("equip-item returns message when item not found", async () => {
   const mockServer = {
-    tool: sinon.stub()
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
+    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
 
   const mockBot = {
     inventory: {
-      items: () => []
-    }
+      items: () => [],
+    },
   } as unknown as mineflayer.Bot;
   const getBot = () => mockBot;
 
   registerInventoryTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
-  const equipItemCall = toolCalls.find(call => call.args[0] === 'equip-item');
-  const executor = equipItemCall!.args[3];
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
+  const equipItemCall = toolCalls.find((call) => call.args[0] === "equip-item");
+  const executor = equipItemCall!.args[2];
 
-  const result = await executor({ itemName: 'diamond_sword', destination: 'hand' });
+  const result = await executor({ itemName: "diamond_sword", destination: "hand" });
 
-  t.true(result.content[0].text.includes('Couldn\'t find'));
+  expect(result.content[0].text.includes("Couldn't find")).toBe(true);
 });

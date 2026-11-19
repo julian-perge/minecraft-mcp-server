@@ -1,174 +1,185 @@
-import test from 'ava';
-import sinon from 'sinon';
-import { BotConnection } from '../src/bot-connection.js';
+import { test, expect } from "bun:test";
+import sinon from "sinon";
+import { BotConnection } from "../src/bot-connection.js";
 
-test('constructor initializes with correct state', (t) => {
-  const config = { host: 'localhost', port: 25565, username: 'TestBot' };
+test("constructor initializes with correct state", () => {
+  const config = { host: "localhost", port: 25565, username: "TestBot" };
   const callbacks = { onLog: sinon.stub(), onChatMessage: sinon.stub() };
   const connection = new BotConnection(config, callbacks);
 
-  t.is(connection.getState(), 'disconnected');
-  t.deepEqual(connection.getConfig(), config);
-  t.is(connection.getBot(), null);
-  t.false(connection.isConnected());
+  expect(connection.getState()).toBe("disconnected");
+  expect(connection.getConfig()).toStrictEqual(config);
+  expect(connection.getBot()).toBe(null);
+  expect(connection.isConnected()).toBe(false);
 });
 
-test('constructor accepts custom reconnect delay', (t) => {
-  const config = { host: 'localhost', port: 25565, username: 'TestBot' };
+test("constructor accepts custom reconnect delay", () => {
+  const config = { host: "localhost", port: 25565, username: "TestBot" };
   const callbacks = { onLog: sinon.stub(), onChatMessage: sinon.stub() };
   const customDelay = 5000;
   const connection = new BotConnection(config, callbacks, customDelay);
 
-  t.is(connection.getState(), 'disconnected');
+  expect(connection.getState()).toBe("disconnected");
 });
 
-test('getState returns current state', (t) => {
-  const config = { host: 'localhost', port: 25565, username: 'TestBot' };
+test("getState returns current state", () => {
+  const config = { host: "localhost", port: 25565, username: "TestBot" };
   const callbacks = { onLog: sinon.stub(), onChatMessage: sinon.stub() };
   const connection = new BotConnection(config, callbacks);
 
-  t.is(connection.getState(), 'disconnected');
+  expect(connection.getState()).toBe("disconnected");
 });
 
-test('getConfig returns configuration', (t) => {
-  const config = { host: 'example.com', port: 30000, username: 'MyBot' };
+test("getConfig returns configuration", () => {
+  const config = { host: "example.com", port: 30000, username: "MyBot" };
   const callbacks = { onLog: sinon.stub(), onChatMessage: sinon.stub() };
   const connection = new BotConnection(config, callbacks);
 
   const returnedConfig = connection.getConfig();
-  t.is(returnedConfig.host, 'example.com');
-  t.is(returnedConfig.port, 30000);
-  t.is(returnedConfig.username, 'MyBot');
+  expect(returnedConfig.host).toBe("example.com");
+  expect(returnedConfig.port).toBe(30000);
+  expect(returnedConfig.username).toBe("MyBot");
 });
 
-test('getBot returns null initially', (t) => {
-  const config = { host: 'localhost', port: 25565, username: 'TestBot' };
+test("getBot returns null initially", () => {
+  const config = { host: "localhost", port: 25565, username: "TestBot" };
   const callbacks = { onLog: sinon.stub(), onChatMessage: sinon.stub() };
   const connection = new BotConnection(config, callbacks);
 
-  t.is(connection.getBot(), null);
+  expect(connection.getBot()).toBe(null);
 });
 
-test('isConnected returns false when state is disconnected', (t) => {
-  const config = { host: 'localhost', port: 25565, username: 'TestBot' };
+test("isConnected returns false when state is disconnected", () => {
+  const config = { host: "localhost", port: 25565, username: "TestBot" };
   const callbacks = { onLog: sinon.stub(), onChatMessage: sinon.stub() };
   const connection = new BotConnection(config, callbacks);
 
-  t.false(connection.isConnected());
+  expect(connection.isConnected()).toBe(false);
 });
 
-test('formatError handles Error objects', (t) => {
-  const config = { host: 'localhost', port: 25565, username: 'TestBot' };
+test("formatError handles Error objects", () => {
+  const config = { host: "localhost", port: 25565, username: "TestBot" };
   const callbacks = { onLog: sinon.stub(), onChatMessage: sinon.stub() };
   const connection = new BotConnection(config, callbacks);
 
-  const error = new Error('Test error');
-  const formatted = (connection as unknown as { formatError: (error: unknown) => string }).formatError(error);
+  const error = new Error("Test error");
+  const formatted = (
+    connection as unknown as { formatError: (error: unknown) => string }
+  ).formatError(error);
 
-  t.is(formatted, 'Test error');
+  expect(formatted).toBe("Test error");
 });
 
-test('formatError handles plain objects', (t) => {
-  const config = { host: 'localhost', port: 25565, username: 'TestBot' };
+test("formatError handles plain objects", () => {
+  const config = { host: "localhost", port: 25565, username: "TestBot" };
   const callbacks = { onLog: sinon.stub(), onChatMessage: sinon.stub() };
   const connection = new BotConnection(config, callbacks);
 
-  const errorObj = { code: 'ECONNREFUSED', message: 'Connection refused' };
-  const formatted = (connection as unknown as { formatError: (error: unknown) => string }).formatError(errorObj);
+  const errorObj = { code: "ECONNREFUSED", message: "Connection refused" };
+  const formatted = (
+    connection as unknown as { formatError: (error: unknown) => string }
+  ).formatError(errorObj);
 
-  t.true(formatted.includes('ECONNREFUSED'));
-  t.true(formatted.includes('Connection refused'));
+  expect(formatted.includes("ECONNREFUSED")).toBe(true);
+  expect(formatted.includes("Connection refused")).toBe(true);
 });
 
-test('formatError handles strings', (t) => {
-  const config = { host: 'localhost', port: 25565, username: 'TestBot' };
+test("formatError handles strings", () => {
+  const config = { host: "localhost", port: 25565, username: "TestBot" };
   const callbacks = { onLog: sinon.stub(), onChatMessage: sinon.stub() };
   const connection = new BotConnection(config, callbacks);
 
-  const formatted = (connection as unknown as { formatError: (error: unknown) => string }).formatError('Simple error');
+  const formatted = (
+    connection as unknown as { formatError: (error: unknown) => string }
+  ).formatError("Simple error");
 
-  t.is(formatted, '"Simple error"');
+  expect(formatted).toBe('"Simple error"');
 });
 
-test('formatError handles non-serializable objects', (t) => {
-  const config = { host: 'localhost', port: 25565, username: 'TestBot' };
+test("formatError handles non-serializable objects", () => {
+  const config = { host: "localhost", port: 25565, username: "TestBot" };
   const callbacks = { onLog: sinon.stub(), onChatMessage: sinon.stub() };
   const connection = new BotConnection(config, callbacks);
 
   const circular: Record<string, unknown> = {};
   circular.self = circular;
-  const formatted = (connection as unknown as { formatError: (error: unknown) => string }).formatError(circular);
+  const formatted = (
+    connection as unknown as { formatError: (error: unknown) => string }
+  ).formatError(circular);
 
-  t.is(typeof formatted, 'string');
+  expect(typeof formatted).toBe("string");
 });
 
-test('checkConnectionAndReconnect returns connected when already connected', async (t) => {
-  const config = { host: 'localhost', port: 25565, username: 'TestBot' };
+test("checkConnectionAndReconnect returns connected when already connected", async () => {
+  const config = { host: "localhost", port: 25565, username: "TestBot" };
   const callbacks = { onLog: sinon.stub(), onChatMessage: sinon.stub() };
   const connection = new BotConnection(config, callbacks);
 
-  (connection as unknown as { state: string }).state = 'connected';
+  (connection as unknown as { state: string }).state = "connected";
 
   const result = await connection.checkConnectionAndReconnect();
 
-  t.true(result.connected);
-  t.is(result.message, undefined);
+  expect(result.connected).toBe(true);
+  expect(result.message).toBe(undefined);
 });
 
-test('checkConnectionAndReconnect returns message when connecting', async (t) => {
-  const config = { host: 'localhost', port: 25565, username: 'TestBot' };
+test("checkConnectionAndReconnect returns message when connecting", async () => {
+  const config = { host: "localhost", port: 25565, username: "TestBot" };
   const callbacks = { onLog: sinon.stub(), onChatMessage: sinon.stub() };
   const connection = new BotConnection(config, callbacks);
 
-  (connection as unknown as { state: string }).state = 'connecting';
+  (connection as unknown as { state: string }).state = "connecting";
 
   const result = await connection.checkConnectionAndReconnect();
 
-  t.false(result.connected);
-  t.true(result.message!.includes('connecting'));
+  expect(result.connected).toBe(false);
+  expect(result.message!.includes("connecting")).toBe(true);
 });
 
-test('checkConnectionAndReconnect includes setup instructions on failure', async (t) => {
-  const config = { host: 'localhost', port: 25565, username: 'TestBot' };
+test("checkConnectionAndReconnect includes setup instructions on failure", async () => {
+  const config = { host: "localhost", port: 25565, username: "TestBot" };
   const callbacks = { onLog: sinon.stub(), onChatMessage: sinon.stub() };
   const connection = new BotConnection(config, callbacks, 100);
 
-  (connection as unknown as { state: string }).state = 'disconnected';
+  (connection as unknown as { state: string }).state = "disconnected";
 
   // Stub attemptReconnect to prevent actual connection attempt
-  const attemptReconnectStub = sinon.stub(connection as unknown as { attemptReconnect: () => void }, 'attemptReconnect').callsFake(() => {
-    (connection as unknown as { state: string }).state = 'connecting';
-  });
+  const attemptReconnectStub = sinon
+    .stub(connection as unknown as { attemptReconnect: () => void }, "attemptReconnect")
+    .callsFake(() => {
+      (connection as unknown as { state: string }).state = "connecting";
+    });
 
   const result = await connection.checkConnectionAndReconnect();
 
-  t.true(attemptReconnectStub.calledOnce);
-  t.false(result.connected);
-  t.true(result.message!.includes('Cannot connect'));
-  t.true(result.message!.includes('localhost:25565'));
-  t.true(result.message!.includes('github.com'));
+  expect(attemptReconnectStub.calledOnce).toBe(true);
+  expect(result.connected).toBe(false);
+  expect(result.message!.includes("Cannot connect")).toBe(true);
+  expect(result.message!.includes("localhost:25565")).toBe(true);
+  expect(result.message!).toContain("https://github.com/julian-perge/minecraft-mcp-server");
 
   attemptReconnectStub.restore();
-});
+}, 10_000);
 
-test('cleanup clears reconnect timer', (t) => {
-  const config = { host: 'localhost', port: 25565, username: 'TestBot' };
+test("cleanup clears reconnect timer", () => {
+  const config = { host: "localhost", port: 25565, username: "TestBot" };
   const callbacks = { onLog: sinon.stub(), onChatMessage: sinon.stub() };
   const connection = new BotConnection(config, callbacks);
 
-  (connection as unknown as { reconnectTimer: ReturnType<typeof setTimeout> }).reconnectTimer = setTimeout(() => {}, 10000);
+  (connection as unknown as { reconnectTimer: ReturnType<typeof setTimeout> }).reconnectTimer =
+    setTimeout(() => {}, 10000);
 
-  t.notThrows(() => {
+  expect(() => {
     connection.cleanup();
-  });
+  }).not.toThrow();
 });
 
-test('cleanup does not throw when no bot exists', (t) => {
-  const config = { host: 'localhost', port: 25565, username: 'TestBot' };
+test("cleanup does not throw when no bot exists", () => {
+  const config = { host: "localhost", port: 25565, username: "TestBot" };
   const callbacks = { onLog: sinon.stub(), onChatMessage: sinon.stub() };
   const connection = new BotConnection(config, callbacks);
 
-  t.notThrows(() => {
+  expect(() => {
     connection.cleanup();
-  });
+  }).not.toThrow();
 });

@@ -1,9 +1,9 @@
-import test from 'ava';
-import { setupStdioFiltering } from '../src/stdio-filter.js';
+import { test, expect } from "bun:test";
+import { setupStdioFiltering } from "../src/stdio-filter.js";
 
-test('allows JSON messages to pass through', (t) => {
+test("allows JSON messages to pass through", () => {
   const originalWrite = process.stdout.write;
-  let capturedOutput = '';
+  let capturedOutput = "";
 
   process.stdout.write = ((chunk: string | Uint8Array) => {
     capturedOutput += chunk.toString();
@@ -15,14 +15,14 @@ test('allows JSON messages to pass through', (t) => {
   const jsonMessage = '{"jsonrpc":"2.0","id":1,"method":"test"}';
   process.stdout.write(jsonMessage);
 
-  t.is(capturedOutput, jsonMessage);
+  expect(capturedOutput).toBe(jsonMessage);
 
   process.stdout.write = originalWrite;
 });
 
-test('allows timestamp log messages to pass through', (t) => {
+test("allows timestamp log messages to pass through", () => {
   const originalWrite = process.stdout.write;
-  let capturedOutput = '';
+  let capturedOutput = "";
 
   process.stdout.write = ((chunk: string | Uint8Array) => {
     capturedOutput += chunk.toString();
@@ -31,17 +31,17 @@ test('allows timestamp log messages to pass through', (t) => {
 
   setupStdioFiltering();
 
-  const logMessage = '2025-11-05T19:45:29.842Z [minecraft] [mcp-server] [info] Bot connected\n';
+  const logMessage = "2025-11-05T19:45:29.842Z [minecraft] [mcp-server] [info] Bot connected\n";
   process.stdout.write(logMessage);
 
-  t.is(capturedOutput, logMessage);
+  expect(capturedOutput).toBe(logMessage);
 
   process.stdout.write = originalWrite;
 });
 
-test('allows newline-only messages to pass through', (t) => {
+test("allows newline-only messages to pass through", () => {
   const originalWrite = process.stdout.write;
-  let capturedOutput = '';
+  let capturedOutput = "";
 
   process.stdout.write = ((chunk: string | Uint8Array) => {
     capturedOutput += chunk.toString();
@@ -50,17 +50,17 @@ test('allows newline-only messages to pass through', (t) => {
 
   setupStdioFiltering();
 
-  process.stdout.write('\n');
-  process.stdout.write('\r\n');
+  process.stdout.write("\n");
+  process.stdout.write("\r\n");
 
-  t.is(capturedOutput, '\n\r\n');
+  expect(capturedOutput).toBe("\n\r\n");
 
   process.stdout.write = originalWrite;
 });
 
-test('filters out random debug messages', (t) => {
+test("filters out random debug messages", () => {
   const originalWrite = process.stdout.write;
-  let capturedOutput = '';
+  let capturedOutput = "";
 
   process.stdout.write = ((chunk: string | Uint8Array) => {
     capturedOutput += chunk.toString();
@@ -69,17 +69,17 @@ test('filters out random debug messages', (t) => {
 
   setupStdioFiltering();
 
-  process.stdout.write('Minecraft bot debug message');
-  process.stdout.write('Some random output');
+  process.stdout.write("Minecraft bot debug message");
+  process.stdout.write("Some random output");
 
-  t.is(capturedOutput, '');
+  expect(capturedOutput).toBe("");
 
   process.stdout.write = originalWrite;
 });
 
-test('filters minecraft-protodef library output', (t) => {
+test("filters minecraft-protodef library output", () => {
   const originalWrite = process.stdout.write;
-  let capturedOutput = '';
+  let capturedOutput = "";
 
   process.stdout.write = ((chunk: string | Uint8Array) => {
     capturedOutput += chunk.toString();
@@ -88,17 +88,17 @@ test('filters minecraft-protodef library output', (t) => {
 
   setupStdioFiltering();
 
-  process.stdout.write('Loading minecraft protocol version 1.20.4');
-  process.stdout.write('[protodef] Packet received');
+  process.stdout.write("Loading minecraft protocol version 1.20.4");
+  process.stdout.write("[protodef] Packet received");
 
-  t.is(capturedOutput, '');
+  expect(capturedOutput).toBe("");
 
   process.stdout.write = originalWrite;
 });
 
-test('allows JSON while filtering other messages', (t) => {
+test("allows JSON while filtering other messages", () => {
   const originalWrite = process.stdout.write;
-  let capturedOutput = '';
+  let capturedOutput = "";
 
   process.stdout.write = ((chunk: string | Uint8Array) => {
     capturedOutput += chunk.toString();
@@ -107,32 +107,32 @@ test('allows JSON while filtering other messages', (t) => {
 
   setupStdioFiltering();
 
-  process.stdout.write('Random message');
+  process.stdout.write("Random message");
   process.stdout.write('{"jsonrpc":"2.0","result":"success"}');
-  process.stdout.write('More random output');
+  process.stdout.write("More random output");
 
-  t.is(capturedOutput, '{"jsonrpc":"2.0","result":"success"}');
+  expect(capturedOutput).toBe('{"jsonrpc":"2.0","result":"success"}');
 
   process.stdout.write = originalWrite;
 });
 
-test('suppresses console.error output', (t) => {
+test("suppresses console.error output", () => {
   setupStdioFiltering();
 
-  t.notThrows(() => {
-    console.error('This should be suppressed');
-    console.error('No errors thrown');
-  });
+  expect(() => {
+    console.error("This should be suppressed");
+    console.error("No errors thrown");
+  }).not.toThrow();
 });
 
-test('console.error becomes a no-op function', (t) => {
+test("console.error becomes a no-op function", () => {
   const originalError = console.error;
 
   setupStdioFiltering();
 
-  const result = console.error('test');
+  const result = console.error("test");
 
-  t.is(result, undefined);
+  expect(result).toBe(undefined);
 
   console.error = originalError;
 });

@@ -1,18 +1,18 @@
-import test from 'ava';
-import sinon from 'sinon';
-import { registerFlightTools } from '../src/tools/flight-tools.js';
-import { ToolFactory } from '../src/tool-factory.js';
-import { BotConnection } from '../src/bot-connection.js';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type mineflayer from 'mineflayer';
-import { Vec3 } from 'vec3';
+import { test, expect } from "bun:test";
+import sinon from "sinon";
+import { registerFlightTools } from "../src/tools/flight-tools.js";
+import { ToolFactory } from "../src/tool-factory.js";
+import { BotConnection } from "../src/bot-connection.js";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type mineflayer from "mineflayer";
+import { Vec3 } from "vec3";
 
-test('registerFlightTools registers fly-to tool', (t) => {
+test("registerFlightTools registers fly-to tool", () => {
   const mockServer = {
-    tool: sinon.stub()
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
+    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
   const mockBot = {} as Partial<mineflayer.Bot>;
@@ -20,19 +20,19 @@ test('registerFlightTools registers fly-to tool', (t) => {
 
   registerFlightTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
-  const flyToCall = toolCalls.find(call => call.args[0] === 'fly-to');
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
+  const flyToCall = toolCalls.find((call) => call.args[0] === "fly-to");
 
-  t.truthy(flyToCall);
-  t.is(flyToCall!.args[1], 'Make the bot fly to a specific position');
+  expect(flyToCall).toBeTruthy();
+  expect(flyToCall!.args[1].description).toBe("Make the bot fly to a specific position");
 });
 
-test('fly-to successfully flies to destination', async (t) => {
+test("fly-to successfully flies to destination", async () => {
   const mockServer = {
-    tool: sinon.stub()
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
+    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
 
@@ -41,83 +41,83 @@ test('fly-to successfully flies to destination', async (t) => {
   const mockBot = {
     creative: {
       flyTo: flyToStub,
-      stopFlying: stopFlyingStub
+      stopFlying: stopFlyingStub,
     },
     entity: {
-      position: new Vec3(0, 64, 0)
-    }
+      position: new Vec3(0, 64, 0),
+    },
   } as unknown as mineflayer.Bot;
   const getBot = () => mockBot;
 
   registerFlightTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
-  const flyToCall = toolCalls.find(call => call.args[0] === 'fly-to');
-  const executor = flyToCall!.args[3];
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
+  const flyToCall = toolCalls.find((call) => call.args[0] === "fly-to");
+  const executor = flyToCall!.args[2];
 
   const result = await executor({ x: 100, y: 80, z: 200 });
 
-  t.true(flyToStub.calledOnce);
-  t.true(stopFlyingStub.calledOnce);
-  t.true(result.content[0].text.includes('Successfully flew'));
-  t.true(result.content[0].text.includes('100'));
+  expect(flyToStub.calledOnce).toBe(true);
+  expect(stopFlyingStub.calledOnce).toBe(true);
+  expect(result.content[0].text.includes("Successfully flew")).toBe(true);
+  expect(result.content[0].text.includes("100")).toBe(true);
 });
 
-test('fly-to returns error when creative mode not available', async (t) => {
+test("fly-to returns error when creative mode not available", async () => {
   const mockServer = {
-    tool: sinon.stub()
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
+    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
 
   const mockBot = {
-    creative: null
+    creative: null,
   } as unknown as mineflayer.Bot;
   const getBot = () => mockBot;
 
   registerFlightTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
-  const flyToCall = toolCalls.find(call => call.args[0] === 'fly-to');
-  const executor = flyToCall!.args[3];
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
+  const flyToCall = toolCalls.find((call) => call.args[0] === "fly-to");
+  const executor = flyToCall!.args[2];
 
   const result = await executor({ x: 100, y: 80, z: 200 });
 
-  t.true(result.content[0].text.includes('Creative mode is not available'));
+  expect(result.content[0].text.includes("Creative mode is not available")).toBe(true);
 });
 
-test('fly-to handles flight errors', async (t) => {
+test("fly-to handles flight errors", async () => {
   const mockServer = {
-    tool: sinon.stub()
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
+    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
 
-  const flyToStub = sinon.stub().rejects(new Error('Cannot reach destination'));
+  const flyToStub = sinon.stub().rejects(new Error("Cannot reach destination"));
   const stopFlyingStub = sinon.stub();
   const mockBot = {
     creative: {
       flyTo: flyToStub,
-      stopFlying: stopFlyingStub
+      stopFlying: stopFlyingStub,
     },
     entity: {
-      position: new Vec3(0, 64, 0)
-    }
+      position: new Vec3(0, 64, 0),
+    },
   } as unknown as mineflayer.Bot;
   const getBot = () => mockBot;
 
   registerFlightTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
-  const flyToCall = toolCalls.find(call => call.args[0] === 'fly-to');
-  const executor = flyToCall!.args[3];
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
+  const flyToCall = toolCalls.find((call) => call.args[0] === "fly-to");
+  const executor = flyToCall!.args[2];
 
   const result = await executor({ x: 100, y: 80, z: 200 });
 
-  t.true(result.isError);
-  t.true(result.content[0].text.includes('Cannot reach destination'));
+  expect(result.isError).toBe(true);
+  expect(result.content[0].text.includes("Cannot reach destination")).toBe(true);
 });
