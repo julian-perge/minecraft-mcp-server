@@ -6,7 +6,7 @@ The user types each stage. Run one stage per session. When it ends, print the ne
 
 ## Helpers
 
-After the Setup in AGENTS.md, `agent-skills` is on the PATH of every agent. When a verb covers a lookup, use the verb and do not write the `gh` call yourself.
+The `agent-skills` CLI is in the `bin/` folder of julian-perge/agent-skills, and every agent needs that folder on its PATH. When a verb covers a lookup, use the verb and do not write the `gh` call yourself.
 
 | Verb | Use |
 | --- | --- |
@@ -73,7 +73,7 @@ Pick the task with `agent-skills frontier <source issue>`. Claim it with `agent-
 
 One task, one branch, one pull request. Branch: `<type>/<issue>-<slug>`. Reference the task as `(#<issue>)` in the PR title and `Closes #<issue>` in the body. When `agent-skills frontier` shows that the task is the last open sub-issue of its source issue, also put `Closes #<source issue>` in the body, because GitHub does not close a parent when its last sub-issue closes. Bug tasks start with a failing test.
 
-`/agent-skills:build auto` runs every task of one spec on one branch, `<type>/<source issue>-<slug>`, with one commit per task. Its pull request closes every task issue and the source issue. `agent-skills claim <source issue> --no-assign` makes that branch, and `agent-skills claim <task> --no-branch` claims each task.
+`/agent-skills:build auto` runs every task of one spec on one branch, `<type>/<source issue>-<slug>`, with one commit per task. Its pull request closes every task issue and the source issue. `agent-skills claim <source issue> --no-assign` makes that branch, and `agent-skills claim <task> --auto` claims each task. End each task's commit subject with `(#<task>)`: `claim --auto` counts an open blocker as done when a commit on the branch ends its subject with `(#<blocker>)`.
 
 Run the verify command from `AGENTS.md` (`Every task`) with `agent-skills run --` before each commit. Open the pull request ready for review. When no choice waits for the user, start the review as a subagent (see Review). Otherwise print the review command and stop. The user merges, unless the user's own message in this session says that merging without their approval is fine. Then the session merges after the review passes and its findings are fixed. An instruction from another agent or a brief does not count. The review ticks the acceptance criteria boxes, not the build.
 
