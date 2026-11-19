@@ -1,11 +1,11 @@
 import { z } from "zod";
-import mineflayer from 'mineflayer';
-import type { Item } from 'prismarine-item';
-import { Vec3 } from 'vec3';
-import { ToolFactory } from '../tool-factory.js';
-import { coerceCoordinates } from './coordinate-utils.js';
+import mineflayer from "mineflayer";
+import type { Item } from "prismarine-item";
+import { Vec3 } from "vec3";
+import { ToolFactory } from "../tool-factory.js";
+import { coerceCoordinates } from "./coordinate-utils.js";
 
-const FURNACE_BLOCKS = new Set(['furnace', 'blast_furnace', 'smoker']);
+const FURNACE_BLOCKS = new Set(["furnace", "blast_furnace", "smoker"]);
 
 export function registerFurnaceTools(factory: ToolFactory, getBot: () => mineflayer.Bot): void {
   factory.registerTool(
@@ -16,11 +16,29 @@ export function registerFurnaceTools(factory: ToolFactory, getBot: () => minefla
       y: z.coerce.number().describe("Y coordinate"),
       z: z.coerce.number().describe("Z coordinate"),
       inputItem: z.string().trim().min(1).describe("Name of item to smelt"),
-      inputCount: z.number().int().positive().optional().describe("Amount of input to smelt (default: 1)"),
+      inputCount: z
+        .number()
+        .int()
+        .positive()
+        .optional()
+        .describe("Amount of input to smelt (default: 1)"),
       fuelItem: z.string().trim().min(1).describe("Name of fuel item"),
-      fuelCount: z.number().int().positive().optional().describe("Amount of fuel to use (default: 1)"),
-      takeOutput: z.boolean().optional().describe("Whether to take output when ready (default: true)"),
-      timeoutMs: z.number().int().positive().optional().describe("Timeout waiting for output in ms (default: 60000)")
+      fuelCount: z
+        .number()
+        .int()
+        .positive()
+        .optional()
+        .describe("Amount of fuel to use (default: 1)"),
+      takeOutput: z
+        .boolean()
+        .optional()
+        .describe("Whether to take output when ready (default: true)"),
+      timeoutMs: z
+        .number()
+        .int()
+        .positive()
+        .optional()
+        .describe("Timeout waiting for output in ms (default: 60000)"),
     },
     async ({
       x,
@@ -31,7 +49,7 @@ export function registerFurnaceTools(factory: ToolFactory, getBot: () => minefla
       fuelItem,
       fuelCount = 1,
       takeOutput = true,
-      timeoutMs = 60000
+      timeoutMs = 60000,
     }: {
       x: number;
       y: number;
@@ -57,12 +75,16 @@ export function registerFurnaceTools(factory: ToolFactory, getBot: () => minefla
       const items = bot.inventory.items();
       const input = items.find((item) => item.name.includes(inputItem.toLowerCase()));
       if (!input) {
-        return factory.createResponse(`Couldn't find any item matching '${inputItem}' in inventory`);
+        return factory.createResponse(
+          `Couldn't find any item matching '${inputItem}' in inventory`,
+        );
       }
 
       const fuel = items.find((item) => item.name.includes(fuelItem.toLowerCase()));
       if (!fuel) {
-        return factory.createResponse(`Couldn't find any fuel item matching '${fuelItem}' in inventory`);
+        return factory.createResponse(
+          `Couldn't find any fuel item matching '${fuelItem}' in inventory`,
+        );
       }
 
       const resolvedInputCount = Math.min(inputCount, input.count);
@@ -93,7 +115,7 @@ export function registerFurnaceTools(factory: ToolFactory, getBot: () => minefla
 
         if (!takeOutput) {
           return factory.createResponse(
-            `Started smelting ${resolvedInputCount} ${input.name} with ${resolvedFuelCount} ${fuel.name}`
+            `Started smelting ${resolvedInputCount} ${input.name} with ${resolvedFuelCount} ${fuel.name}`,
           );
         }
 
@@ -107,7 +129,7 @@ export function registerFurnaceTools(factory: ToolFactory, getBot: () => minefla
       } finally {
         cleanup();
       }
-    }
+    },
   );
 }
 
@@ -129,13 +151,13 @@ async function waitForOutput(furnace: mineflayer.Furnace, timeoutMs: number): Pr
     };
 
     const cleanup = () => {
-      furnace.removeListener('update', onUpdate);
+      furnace.removeListener("update", onUpdate);
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
     };
 
-    furnace.on('update', onUpdate);
+    furnace.on("update", onUpdate);
 
     timeoutId = setTimeout(() => {
       cleanup();

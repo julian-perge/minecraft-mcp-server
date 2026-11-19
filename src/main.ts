@@ -2,49 +2,46 @@
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { setupStdioFiltering } from './stdio-filter.js';
-import { log } from './logger.js';
-import { parseConfig } from './config.js';
-import { BotConnection } from './bot-connection.js';
-import { ToolFactory } from './tool-factory.js';
-import { MessageStore } from './message-store.js';
-import { registerPositionTools } from './tools/position-tools.js';
-import { registerInventoryTools } from './tools/inventory-tools.js';
-import { registerBlockTools } from './tools/block-tools.js';
-import { registerEntityTools } from './tools/entity-tools.js';
-import { registerChatTools } from './tools/chat-tools.js';
-import { registerFlightTools } from './tools/flight-tools.js';
-import { registerGameStateTools } from './tools/gamestate-tools.js';
-import { registerCraftingTools } from './tools/crafting-tools.js';
-import { registerFurnaceTools } from './tools/furnace-tools.js';
+import { setupStdioFiltering } from "./stdio-filter.js";
+import { log } from "./logger.js";
+import { parseConfig } from "./config.js";
+import { BotConnection } from "./bot-connection.js";
+import { ToolFactory } from "./tool-factory.js";
+import { MessageStore } from "./message-store.js";
+import { registerPositionTools } from "./tools/position-tools.js";
+import { registerInventoryTools } from "./tools/inventory-tools.js";
+import { registerBlockTools } from "./tools/block-tools.js";
+import { registerEntityTools } from "./tools/entity-tools.js";
+import { registerChatTools } from "./tools/chat-tools.js";
+import { registerFlightTools } from "./tools/flight-tools.js";
+import { registerGameStateTools } from "./tools/gamestate-tools.js";
+import { registerCraftingTools } from "./tools/crafting-tools.js";
+import { registerFurnaceTools } from "./tools/furnace-tools.js";
 
 setupStdioFiltering();
 
-process.on('unhandledRejection', (reason) => {
-  log('error', `Unhandled rejection: ${reason}`);
+process.on("unhandledRejection", (reason) => {
+  log("error", `Unhandled rejection: ${reason}`);
 });
 
-process.on('uncaughtException', (error) => {
-  log('error', `Uncaught exception: ${error}`);
+process.on("uncaughtException", (error) => {
+  log("error", `Uncaught exception: ${error}`);
 });
 
 async function main() {
   const config = parseConfig();
   const messageStore = new MessageStore();
 
-  const connection = new BotConnection(
-    config,
-    {
-      onLog: log,
-      onChatMessage: (username, message) => messageStore.addMessage(username, message)
-    }
-  );
+  const connection = new BotConnection(config, {
+    onLog: log,
+    onChatMessage: (username, message) => messageStore.addMessage(username, message),
+  });
 
   connection.connect();
 
   const server = new McpServer({
     name: "minecraft-mcp-server",
-    version: "2.0.4"
+    version: "2.0.4",
   });
 
   const factory = new ToolFactory(server, connection);
@@ -60,9 +57,9 @@ async function main() {
   registerCraftingTools(factory, getBot);
   registerFurnaceTools(factory, getBot);
 
-  process.stdin.on('end', () => {
+  process.stdin.on("end", () => {
     connection.cleanup();
-    log('info', 'MCP Client has disconnected. Shutting down...');
+    log("info", "MCP Client has disconnected. Shutting down...");
     process.exit(0);
   });
 
@@ -71,6 +68,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  log('error', `Fatal error in main(): ${error}`);
+  log("error", `Fatal error in main(): ${error}`);
   process.exit(1);
 });

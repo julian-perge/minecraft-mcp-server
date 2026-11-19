@@ -14,7 +14,7 @@ export class MessageStore {
     const message: StoredMessage = {
       timestamp: Date.now(),
       username,
-      content
+      content,
     };
 
     this.messages.push(message);

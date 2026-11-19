@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z, ZodError, ZodRawShape, ZodType } from "zod";
-import { BotConnection } from './bot-connection.js';
+import { BotConnection } from "./bot-connection.js";
 
 type McpResponse = {
   content: { type: "text"; text: string }[];
@@ -11,14 +11,14 @@ type McpResponse = {
 export class ToolFactory {
   constructor(
     private server: McpServer,
-    private connection: BotConnection
+    private connection: BotConnection,
   ) {}
 
   registerTool(
     name: string,
     description: string,
     schema: Record<string, unknown>,
-    executor: (args: any) => Promise<McpResponse>
+    executor: (args: any) => Promise<McpResponse>,
   ): void {
     this.server.tool(name, description, schema, async (args: unknown): Promise<McpResponse> => {
       const connectionCheck = await this.connection.checkConnectionAndReconnect();
@@ -26,7 +26,7 @@ export class ToolFactory {
       if (!connectionCheck.connected) {
         return {
           content: [{ type: "text", text: connectionCheck.message! }],
-          isError: true
+          isError: true,
         };
       }
 
@@ -43,7 +43,7 @@ export class ToolFactory {
 
   createResponse(text: string): McpResponse {
     return {
-      content: [{ type: "text", text }]
+      content: [{ type: "text", text }],
     };
   }
 
@@ -51,7 +51,7 @@ export class ToolFactory {
     const errorMessage = error instanceof Error ? error.message : error;
     return {
       content: [{ type: "text", text: `Failed: ${errorMessage}` }],
-      isError: true
+      isError: true,
     };
   }
 
@@ -66,7 +66,10 @@ export class ToolFactory {
 
   private parseArgs(schema: ZodRawShape, args: unknown): unknown {
     try {
-      return z.object(schema).passthrough().parse(args ?? {});
+      return z
+        .object(schema)
+        .passthrough()
+        .parse(args ?? {});
     } catch (error) {
       if (error instanceof ZodError) {
         throw new Error(this.formatZodError(error));
@@ -78,10 +81,10 @@ export class ToolFactory {
   private formatZodError(error: ZodError): string {
     const details = error.issues
       .map((issue) => {
-        const path = issue.path.length > 0 ? `${issue.path.join('.')}: ` : '';
+        const path = issue.path.length > 0 ? `${issue.path.join(".")}: ` : "";
         return `${path}${issue.message}`;
       })
-      .join('; ');
+      .join("; ");
 
     return `Invalid tool arguments: ${details}`;
   }

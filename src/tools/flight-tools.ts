@@ -1,24 +1,25 @@
 import { z } from "zod";
-import mineflayer from 'mineflayer';
-import { Vec3 } from 'vec3';
-import { ToolFactory } from '../tool-factory.js';
-import { coerceCoordinates } from './coordinate-utils.js';
+import mineflayer from "mineflayer";
+import { Vec3 } from "vec3";
+import { ToolFactory } from "../tool-factory.js";
+import { coerceCoordinates } from "./coordinate-utils.js";
 
 function createCancellableFlightOperation(
   bot: mineflayer.Bot,
   destination: Vec3,
-  controller: AbortController
+  controller: AbortController,
 ): Promise<boolean> {
   return new Promise((resolve, reject) => {
     let aborted = false;
 
-    controller.signal.addEventListener('abort', () => {
+    controller.signal.addEventListener("abort", () => {
       aborted = true;
       bot.creative.stopFlying();
       reject(new Error("Flight operation cancelled"));
     });
 
-    bot.creative.flyTo(destination)
+    bot.creative
+      .flyTo(destination)
       .then(() => {
         if (!aborted) {
           resolve(true);
@@ -39,7 +40,7 @@ export function registerFlightTools(factory: ToolFactory, getBot: () => mineflay
     {
       x: z.coerce.number().describe("X coordinate"),
       y: z.coerce.number().describe("Y coordinate"),
-      z: z.coerce.number().describe("Z coordinate")
+      z: z.coerce.number().describe("Z coordinate"),
     },
     async ({ x, y, z }) => {
       ({ x, y, z } = coerceCoordinates(x, y, z));
@@ -68,7 +69,7 @@ export function registerFlightTools(factory: ToolFactory, getBot: () => mineflay
           const currentPosAfterTimeout = bot.entity.position;
           return factory.createErrorResponse(
             `Flight timed out after ${FLIGHT_TIMEOUT_MS / 1000} seconds. The destination may be unreachable. ` +
-            `Current position: (${Math.floor(currentPosAfterTimeout.x)}, ${Math.floor(currentPosAfterTimeout.y)}, ${Math.floor(currentPosAfterTimeout.z)})`
+              `Current position: (${Math.floor(currentPosAfterTimeout.x)}, ${Math.floor(currentPosAfterTimeout.y)}, ${Math.floor(currentPosAfterTimeout.z)})`,
           );
         }
         throw error;
@@ -76,6 +77,6 @@ export function registerFlightTools(factory: ToolFactory, getBot: () => mineflay
         clearTimeout(timeoutId);
         bot.creative.stopFlying();
       }
-    }
+    },
   );
 }
