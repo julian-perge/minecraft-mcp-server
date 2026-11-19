@@ -28,7 +28,7 @@ require +tools:
 # The lint recipe runs the type check too, through the bun-check hook in prek.toml.
 [doc('Run the gate that proves a change: lint, type check, unit tests and build')]
 [group('check')]
-check: lint test build
+check: lint test build smoke
 
 [doc('Run the prek hooks in prek.toml on every file, and show the diff of any file they fix')]
 [group('check')]
@@ -50,6 +50,12 @@ typecheck: (require "bun")
 [group('check')]
 test *files: (require "bun")
     bun run test "$@"
+
+# bun runs the unit tests and resolves CommonJS imports that Node refuses, so this loads the built server in Node, the runtime that users run.
+[doc('Start the built server in Node with --help, which loads every module and exits')]
+[group('check')]
+smoke: (require "node")
+    node dist/main.js --help > /dev/null
 
 [doc('Compile src into dist/')]
 [group('build')]
