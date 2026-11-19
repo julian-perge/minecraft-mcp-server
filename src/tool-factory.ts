@@ -18,7 +18,6 @@ export class ToolFactory {
     name: string,
     description: string,
     schema: Record<string, unknown>,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     executor: (args: any) => Promise<McpResponse>
   ): void {
     this.server.tool(name, description, schema, async (args: unknown): Promise<McpResponse> => {

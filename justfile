@@ -1,6 +1,6 @@
 # Local shortcuts for checking, building and running the MCP server. `just` lists them, and `just <recipe>` runs one.
 #
-# CI does not call just. .github/workflows/build.yml runs ESLint, tsc, the tests and the build with bun directly, and does not run the prek hooks.
+# CI does not call just. .github/workflows/build.yml runs oxlint, the type check, the tests and the build with bun directly, and does not run the prek hooks.
 
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
@@ -25,9 +25,10 @@ require +tools:
         exit 1
     fi
 
+# The lint recipe runs the type check too, through the bun-check hook in prek.toml.
 [doc('Run the gate that proves a change: lint, type check, unit tests and build')]
 [group('check')]
-check: lint typecheck test build
+check: lint test build
 
 [doc('Run the prek hooks in prek.toml on every file, and show the diff of any file they fix')]
 [group('check')]
@@ -43,7 +44,7 @@ fmt: (require "prek" "bun")
 [doc('Type-check src and tests')]
 [group('check')]
 typecheck: (require "bun")
-    bun x tsc --noEmit
+    bun check
 
 [doc('Run the unit tests, or the given test files')]
 [group('check')]
