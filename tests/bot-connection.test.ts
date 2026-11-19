@@ -156,7 +156,7 @@ test("checkConnectionAndReconnect includes setup instructions on failure", async
   expect(result.connected).toBe(false);
   expect(result.message!.includes("Cannot connect")).toBe(true);
   expect(result.message!.includes("localhost:25565")).toBe(true);
-  expect(result.message!.includes("github.com")).toBe(true);
+  expect(result.message!).toContain("https://github.com/julian-perge/minecraft-mcp-server");
 
   attemptReconnectStub.restore();
 }, 10_000);

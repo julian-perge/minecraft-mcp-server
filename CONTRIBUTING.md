@@ -1,105 +1,30 @@
-# Welcome to Minecraft-MCP-Server Contributing Guide
+# Contributing
 
-## Prerequisites
-- Git
-- Node.js (>=20.10.0)
-- A running Minecraft game (tested with Minecraft 1.21.11 Java Edition)
-- Claude Desktop (or another MCP-compatible client)
+Work on this repo goes through GitHub issues on julian-perge/minecraft-mcp-server. [AGENTS.md](AGENTS.md) and [docs/agents/workflow.md](docs/agents/workflow.md) give the full rules. This file is the short version.
 
-### 1. Fork and Clone the Repository
+## Set up
 
-1. Fork this repository on GitHub
-2. Clone your fork locally:
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/minecraft-mcp-server.git
-   cd minecraft-mcp-server
-   ```
+Install bun 1.4.4 or later, Node 22 or later, [just](https://just.systems) and [prek](https://prek.j178.dev). Then:
 
-### 2. Create a Feature Branch
-
-Create a new branch for your feature or bug fix:
 ```bash
-git checkout -b your-feature-name
+just install
+prek install
 ```
 
-### 3. Setup Minecraft Server
+`prek install` makes the hooks in `prek.toml` run on each commit: oxfmt, oxlint, `bun check` and the file checks.
 
-Create a singleplayer world and open it to LAN (ESC -> Open to LAN). The bot will connect using port 25565 and hostname localhost by default.
+## Make a change
 
-For a more detailed setup guide, see the [README](README.md).
+1. Open an issue, or pick one with the `ready-for-agent` or `ready-for-human` label.
+2. Make a branch named `<type>/<issue>-<slug>`, for example `fix/12-dig-block-timeout`.
+3. Write a failing test in `tests/` first when the change fixes a bug or changes behavior.
+4. Run `just check`. It must pass before each commit.
+5. Open a pull request against `main` of this repo. Put `(#<issue>)` in the title and `Closes #<issue>` in the body.
 
-### 4. Configure Your MCP Client
+Pass `--repo julian-perge/minecraft-mcp-server` to every `gh` command that writes. In a fork, a bare `gh` can pick the parent repo as the base of a pull request.
 
-#### For Claude Desktop Users
+## Try a change with a client
 
-Make sure [Claude Desktop](https://claude.ai/download) is installed. Open your desktop config file via Claude Desktop: `File -> Settings -> Developer -> Edit Config`
+Run `just build`, then restart your MCP client. The client config points at `dist/main.js` in your clone, as the README shows, so the client runs the new build. `just dev` builds and starts the server in the terminal, which helps when you read the logs on stderr.
 
-Alternatively, you can edit the config file directly:
-
-**MacOS/Linux**
-```bash
-code ~/Library/Application\ Support/Claude/claude_desktop_config.json
-```
-
-**Windows**
-```bash
-code $env:AppData\Claude\claude_desktop_config.json
-```
-
-#### For Other MCP Clients
-
-If you're using a different MCP client, configure it according to your client's documentation to point to the npx command and arguments shown below.
-
-### 5. Point Your Client to Your Development Branch
-
-Update your MCP configuration to use your fork and branch:
-
-**For Claude Desktop (`claude_desktop_config.json`):**
-```json
-{
-  "mcpServers": {
-    "minecraft": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "github:YOUR_USERNAME/minecraft-mcp-server#your-feature-branch-name",
-        "--host",
-        "localhost",
-        "--port",
-        "25565",
-        "--username",
-        "ClaudeBot"
-      ]
-    }
-  }
-}
-```
-
-### 6. Development Workflow
-
-1. Make your changes and commit them to your feature branch
-2. Push your branch to your fork:
-   ```bash
-   git push origin your-feature-name
-   ```
-3. Restart your MCP client completely (for Claude Desktop, close from system tray)
-4. Open your MCP client - it will automatically pull and run your latest changes
-5. Test your changes through your client's chat interface
-
-### 7. Debugging with MCP Inspector
-
-The [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector) is an excellent tool for debugging and testing your MCP server during development. It provides a user-friendly interface to:
-
-- Test individual tools without needing a full MCP client
-- Inspect requests and responses
-- Debug connection issues
-- Validate tool schemas and responses
-
-To use the MCP Inspector with your development branch, follow the guide at: https://modelcontextprotocol.io/docs/tools/inspector
-
-## Submitting Changes
-
-Once you're happy with your changes:
-1. Push your feature branch to your fork
-2. Create a Pull Request from your fork to the main repository
-3. Others can test your changes by pointing their config to your fork/branch
+The [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector) calls single tools without a full client.
