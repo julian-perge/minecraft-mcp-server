@@ -80,7 +80,7 @@ function countRecipeIngredients(mcData: unknown, recipe: unknown): Record<string
 
 test("registerCraftingTools registers all 4 tools", () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -91,7 +91,7 @@ test("registerCraftingTools registers all 4 tools", () => {
 
   registerCraftingTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const toolNames = toolCalls.map((call) => call.args[0]);
 
   expect(toolNames.includes("list-recipes")).toBe(true);
@@ -102,7 +102,7 @@ test("registerCraftingTools registers all 4 tools", () => {
 
 test("can-craft with empty inventory returns missing items", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -119,9 +119,9 @@ test("can-craft with empty inventory returns missing items", async () => {
 
   registerCraftingTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const canCraftCall = toolCalls.find((call) => call.args[0] === "can-craft");
-  const executor = canCraftCall!.args[3];
+  const executor = canCraftCall!.args[2];
 
   const result = await executor({ itemName: "stick" });
 
@@ -133,7 +133,7 @@ test("can-craft with empty inventory returns missing items", async () => {
 
 test("get-recipe returns recipe structure for valid item", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -150,9 +150,9 @@ test("get-recipe returns recipe structure for valid item", async () => {
 
   registerCraftingTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const getRecipeCall = toolCalls.find((call) => call.args[0] === "get-recipe");
-  const executor = getRecipeCall!.args[3];
+  const executor = getRecipeCall!.args[2];
 
   const result = await executor({ itemName: "stick" });
 
@@ -177,7 +177,7 @@ test("get-recipe returns recipe structure for valid item", async () => {
 
 test("list-recipes returns proper structure", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -194,9 +194,9 @@ test("list-recipes returns proper structure", async () => {
 
   registerCraftingTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const listRecipesCall = toolCalls.find((call) => call.args[0] === "list-recipes");
-  const executor = listRecipesCall!.args[3];
+  const executor = listRecipesCall!.args[2];
 
   const result = await executor({ outputItem: undefined });
 
@@ -208,7 +208,7 @@ test("list-recipes returns proper structure", async () => {
 
 test("craft-item returns error when recipe not available", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -225,9 +225,9 @@ test("craft-item returns error when recipe not available", async () => {
 
   registerCraftingTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const craftItemCall = toolCalls.find((call) => call.args[0] === "craft-item");
-  const executor = craftItemCall!.args[3];
+  const executor = craftItemCall!.args[2];
 
   const result = await executor({ outputItem: "stick", amount: 1 });
 
@@ -257,7 +257,7 @@ test("craft-item crafts successfully when ingredients are available", async () =
     slot: idx,
   }));
 
-  const mockServer = { tool: sinon.stub() } as unknown as McpServer;
+  const mockServer = { registerTool: sinon.stub() } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
   } as unknown as BotConnection;
@@ -271,9 +271,9 @@ test("craft-item crafts successfully when ingredients are available", async () =
   } as unknown as mineflayer.Bot;
 
   registerCraftingTools(factory, () => mockBot);
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const craftItemCall = toolCalls.find((call) => call.args[0] === "craft-item");
-  const executor = craftItemCall!.args[3];
+  const executor = craftItemCall!.args[2];
 
   const result = await executor({ outputItem: "stick", amount: 1 });
 

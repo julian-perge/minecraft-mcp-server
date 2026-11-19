@@ -9,7 +9,7 @@ import { Vec3 } from "vec3";
 
 test("registerEntityTools registers find-entity tool", () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -20,16 +20,16 @@ test("registerEntityTools registers find-entity tool", () => {
 
   registerEntityTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const findEntityCall = toolCalls.find((call) => call.args[0] === "find-entity");
 
   expect(findEntityCall).toBeTruthy();
-  expect(findEntityCall!.args[1]).toBe("Find the nearest entity of a specific type");
+  expect(findEntityCall!.args[1].description).toBe("Find the nearest entity of a specific type");
 });
 
 test("find-entity returns entity when found", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -51,9 +51,9 @@ test("find-entity returns entity when found", async () => {
 
   registerEntityTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const findEntityCall = toolCalls.find((call) => call.args[0] === "find-entity");
-  const executor = findEntityCall!.args[3];
+  const executor = findEntityCall!.args[2];
 
   const result = await executor({ type: "zombie", maxDistance: 16 });
 
@@ -65,7 +65,7 @@ test("find-entity returns entity when found", async () => {
 
 test("find-entity returns not found when entity too far", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -87,9 +87,9 @@ test("find-entity returns not found when entity too far", async () => {
 
   registerEntityTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const findEntityCall = toolCalls.find((call) => call.args[0] === "find-entity");
-  const executor = findEntityCall!.args[3];
+  const executor = findEntityCall!.args[2];
 
   const result = await executor({ type: "zombie", maxDistance: 16 });
 
@@ -98,7 +98,7 @@ test("find-entity returns not found when entity too far", async () => {
 
 test("find-entity returns not found when no entity exists", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -115,9 +115,9 @@ test("find-entity returns not found when no entity exists", async () => {
 
   registerEntityTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const findEntityCall = toolCalls.find((call) => call.args[0] === "find-entity");
-  const executor = findEntityCall!.args[3];
+  const executor = findEntityCall!.args[2];
 
   const result = await executor({ type: "zombie", maxDistance: 16 });
 
@@ -126,7 +126,7 @@ test("find-entity returns not found when no entity exists", async () => {
 
 test("find-entity handles player type", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -148,9 +148,9 @@ test("find-entity handles player type", async () => {
 
   registerEntityTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const findEntityCall = toolCalls.find((call) => call.args[0] === "find-entity");
-  const executor = findEntityCall!.args[3];
+  const executor = findEntityCall!.args[2];
 
   const result = await executor({ type: "player", maxDistance: 16 });
 
@@ -159,7 +159,7 @@ test("find-entity handles player type", async () => {
 
 test("find-entity searches any entity when type not specified", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -181,9 +181,9 @@ test("find-entity searches any entity when type not specified", async () => {
 
   registerEntityTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const findEntityCall = toolCalls.find((call) => call.args[0] === "find-entity");
-  const executor = findEntityCall!.args[3];
+  const executor = findEntityCall!.args[2];
 
   const result = await executor({ maxDistance: 16 });
 

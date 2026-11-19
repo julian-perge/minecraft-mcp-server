@@ -1,11 +1,10 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z, ZodError, ZodRawShape, ZodType } from "zod";
-import { BotConnection } from "./bot-connection.js";
+import type { McpServer, ToolCallback } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import type { z } from "zod";
+import type { BotConnection } from "./bot-connection.js";
 
-type McpResponse = {
+type McpResponse = CallToolResult & {
   content: { type: "text"; text: string }[];
-  isError?: boolean;
-  [key: string]: unknown;
 };
 
 export class ToolFactory {
@@ -14,13 +13,15 @@ export class ToolFactory {
     private connection: BotConnection,
   ) {}
 
-  registerTool(
+  // The SDK checks the arguments against inputSchema before it calls the handler, and answers a bad call with an "Invalid arguments for tool" error, so the executor only sees parsed arguments.
+  registerTool<Shape extends z.ZodRawShape>(
     name: string,
     description: string,
-    schema: Record<string, unknown>,
-    executor: (args: any) => Promise<McpResponse>,
+    inputSchema: Shape,
+    executor: (args: z.infer<z.ZodObject<Shape>>) => Promise<McpResponse>,
   ): void {
-    this.server.tool(name, description, schema, async (args: unknown): Promise<McpResponse> => {
+    // ToolCallback stays an unresolved conditional type for a generic Shape, so the handler is typed for any raw shape and casts the arguments it passes on.
+    const handler: ToolCallback<z.ZodRawShape> = async (args) => {
       const connectionCheck = await this.connection.checkConnectionAndReconnect();
 
       if (!connectionCheck.connected) {
@@ -31,14 +32,16 @@ export class ToolFactory {
       }
 
       try {
-        const parsedArgs = this.shouldValidateSchema(schema)
-          ? this.parseArgs(schema as ZodRawShape, args)
-          : args;
-        return await executor(parsedArgs);
+        return await executor(args as z.infer<z.ZodObject<Shape>>);
       } catch (error) {
         return this.createErrorResponse(error as Error);
       }
-    });
+    };
+    this.server.registerTool(
+      name,
+      { description, inputSchema: inputSchema as z.ZodRawShape },
+      handler,
+    );
   }
 
   createResponse(text: string): McpResponse {
@@ -53,39 +56,5 @@ export class ToolFactory {
       content: [{ type: "text", text: `Failed: ${errorMessage}` }],
       isError: true,
     };
-  }
-
-  private shouldValidateSchema(schema: Record<string, unknown>): boolean {
-    const values = Object.values(schema);
-    if (values.length === 0) {
-      return true;
-    }
-
-    return values.every((value) => value instanceof ZodType);
-  }
-
-  private parseArgs(schema: ZodRawShape, args: unknown): unknown {
-    try {
-      return z
-        .object(schema)
-        .passthrough()
-        .parse(args ?? {});
-    } catch (error) {
-      if (error instanceof ZodError) {
-        throw new Error(this.formatZodError(error));
-      }
-      throw error;
-    }
-  }
-
-  private formatZodError(error: ZodError): string {
-    const details = error.issues
-      .map((issue) => {
-        const path = issue.path.length > 0 ? `${issue.path.join(".")}: ` : "";
-        return `${path}${issue.message}`;
-      })
-      .join("; ");
-
-    return `Invalid tool arguments: ${details}`;
   }
 }

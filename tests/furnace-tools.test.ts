@@ -3,6 +3,7 @@ import sinon from "sinon";
 import { EventEmitter } from "events";
 import { registerFurnaceTools } from "../src/tools/furnace-tools.js";
 import { ToolFactory } from "../src/tool-factory.js";
+import { connectTools, textOf } from "./helpers/mcp-client.js";
 import { BotConnection } from "../src/bot-connection.js";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type mineflayer from "mineflayer";
@@ -17,7 +18,7 @@ const createMockItem = (fields: {
 }): Item => fields as unknown as Item;
 
 test("registerFurnaceTools registers smelt-item tool", () => {
-  const mockServer = { tool: sinon.stub() } as unknown as McpServer;
+  const mockServer = { registerTool: sinon.stub() } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
   } as unknown as BotConnection;
@@ -27,14 +28,14 @@ test("registerFurnaceTools registers smelt-item tool", () => {
 
   registerFurnaceTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const smeltCall = toolCalls.find((call) => call.args[0] === "smelt-item");
   expect(smeltCall).toBeTruthy();
-  expect(smeltCall!.args[1]).toBe("Smelt items using a furnace-like block");
+  expect(smeltCall!.args[1].description).toBe("Smelt items using a furnace-like block");
 });
 
 test("smelt-item returns error when no furnace block found", async () => {
-  const mockServer = { tool: sinon.stub() } as unknown as McpServer;
+  const mockServer = { registerTool: sinon.stub() } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
   } as unknown as BotConnection;
@@ -47,9 +48,9 @@ test("smelt-item returns error when no furnace block found", async () => {
 
   registerFurnaceTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const smeltCall = toolCalls.find((call) => call.args[0] === "smelt-item");
-  const executor = smeltCall!.args[3];
+  const executor = smeltCall!.args[2];
 
   const result = await executor({
     x: 1,
@@ -63,7 +64,7 @@ test("smelt-item returns error when no furnace block found", async () => {
 });
 
 test("smelt-item loads input and fuel and takes output", async () => {
-  const mockServer = { tool: sinon.stub() } as unknown as McpServer;
+  const mockServer = { registerTool: sinon.stub() } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
   } as unknown as BotConnection;
@@ -100,9 +101,9 @@ test("smelt-item loads input and fuel and takes output", async () => {
 
   registerFurnaceTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const smeltCall = toolCalls.find((call) => call.args[0] === "smelt-item");
-  const executor = smeltCall!.args[3];
+  const executor = smeltCall!.args[2];
 
   const result = await executor({
     x: 1,
@@ -120,45 +121,22 @@ test("smelt-item loads input and fuel and takes output", async () => {
 });
 
 test("smelt-item returns validation error for non-positive counts", async () => {
-  const mockServer = { tool: sinon.stub() } as unknown as McpServer;
-  const mockConnection = {
-    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
-  } as unknown as BotConnection;
-  const factory = new ToolFactory(mockServer, mockConnection);
   const mockBot = {} as Partial<mineflayer.Bot>;
-  const getBot = () => mockBot as mineflayer.Bot;
+  const tools = await connectTools((factory) =>
+    registerFurnaceTools(factory, () => mockBot as mineflayer.Bot),
+  );
+  const args = { x: 1, y: 2, z: 3, inputItem: "iron_ore", fuelItem: "coal" };
 
-  registerFurnaceTools(factory, getBot);
-
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
-  const smeltCall = toolCalls.find((call) => call.args[0] === "smelt-item");
-  const executor = smeltCall!.args[3];
-
-  const inputCountResult = await executor({
-    x: 1,
-    y: 2,
-    z: 3,
-    inputItem: "iron_ore",
-    inputCount: 0,
-    fuelItem: "coal",
-    fuelCount: 1,
-  });
+  const inputCountResult = await tools.call("smelt-item", { ...args, inputCount: 0, fuelCount: 1 });
 
   expect(inputCountResult.isError).toBe(true);
-  expect(inputCountResult.content[0].text.includes("Invalid tool arguments")).toBe(true);
-  expect(inputCountResult.content[0].text.includes("inputCount")).toBe(true);
+  expect(textOf(inputCountResult)).toContain("Invalid arguments for tool smelt-item");
+  expect(textOf(inputCountResult)).toContain("inputCount");
 
-  const fuelCountResult = await executor({
-    x: 1,
-    y: 2,
-    z: 3,
-    inputItem: "iron_ore",
-    inputCount: 1,
-    fuelItem: "coal",
-    fuelCount: -1,
-  });
+  const fuelCountResult = await tools.call("smelt-item", { ...args, inputCount: 1, fuelCount: -1 });
 
   expect(fuelCountResult.isError).toBe(true);
-  expect(fuelCountResult.content[0].text.includes("Invalid tool arguments")).toBe(true);
-  expect(fuelCountResult.content[0].text.includes("fuelCount")).toBe(true);
+  expect(textOf(fuelCountResult)).toContain("Invalid arguments for tool smelt-item");
+  expect(textOf(fuelCountResult)).toContain("fuelCount");
+  await tools.close();
 });

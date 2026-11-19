@@ -8,7 +8,7 @@ import type mineflayer from "mineflayer";
 
 test("registerInventoryTools registers list-inventory tool", () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -19,16 +19,16 @@ test("registerInventoryTools registers list-inventory tool", () => {
 
   registerInventoryTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const listInventoryCall = toolCalls.find((call) => call.args[0] === "list-inventory");
 
   expect(listInventoryCall).toBeTruthy();
-  expect(listInventoryCall!.args[1]).toBe("List all items in the bot's inventory");
+  expect(listInventoryCall!.args[1].description).toBe("List all items in the bot's inventory");
 });
 
 test("registerInventoryTools registers equip-item tool", () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -39,16 +39,16 @@ test("registerInventoryTools registers equip-item tool", () => {
 
   registerInventoryTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const equipItemCall = toolCalls.find((call) => call.args[0] === "equip-item");
 
   expect(equipItemCall).toBeTruthy();
-  expect(equipItemCall!.args[1]).toBe("Equip a specific item");
+  expect(equipItemCall!.args[1].description).toBe("Equip a specific item");
 });
 
 test("list-inventory returns empty when no items", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -64,9 +64,9 @@ test("list-inventory returns empty when no items", async () => {
 
   registerInventoryTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const listInventoryCall = toolCalls.find((call) => call.args[0] === "list-inventory");
-  const executor = listInventoryCall!.args[3];
+  const executor = listInventoryCall!.args[2];
 
   const result = await executor({});
 
@@ -75,7 +75,7 @@ test("list-inventory returns empty when no items", async () => {
 
 test("list-inventory returns items with counts", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -94,9 +94,9 @@ test("list-inventory returns items with counts", async () => {
 
   registerInventoryTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const listInventoryCall = toolCalls.find((call) => call.args[0] === "list-inventory");
-  const executor = listInventoryCall!.args[3];
+  const executor = listInventoryCall!.args[2];
 
   const result = await executor({});
 
@@ -107,7 +107,7 @@ test("list-inventory returns items with counts", async () => {
 
 test("equip-item calls bot.equip", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -125,9 +125,9 @@ test("equip-item calls bot.equip", async () => {
 
   registerInventoryTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const equipItemCall = toolCalls.find((call) => call.args[0] === "equip-item");
-  const executor = equipItemCall!.args[3];
+  const executor = equipItemCall!.args[2];
 
   const result = await executor({ itemName: "diamond_sword", destination: "hand" });
 
@@ -138,7 +138,7 @@ test("equip-item calls bot.equip", async () => {
 
 test("equip-item returns message when item not found", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -154,9 +154,9 @@ test("equip-item returns message when item not found", async () => {
 
   registerInventoryTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const equipItemCall = toolCalls.find((call) => call.args[0] === "equip-item");
-  const executor = equipItemCall!.args[3];
+  const executor = equipItemCall!.args[2];
 
   const result = await executor({ itemName: "diamond_sword", destination: "hand" });
 

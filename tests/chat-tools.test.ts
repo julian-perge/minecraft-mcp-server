@@ -9,7 +9,7 @@ import type mineflayer from "mineflayer";
 
 test("registerChatTools registers send-chat tool", () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -21,16 +21,16 @@ test("registerChatTools registers send-chat tool", () => {
 
   registerChatTools(factory, getBot, messageStore);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const sendChatCall = toolCalls.find((call) => call.args[0] === "send-chat");
 
   expect(sendChatCall).toBeTruthy();
-  expect(sendChatCall!.args[1]).toBe("Send a chat message in-game");
+  expect(sendChatCall!.args[1].description).toBe("Send a chat message in-game");
 });
 
 test("registerChatTools registers read-chat tool", () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -42,16 +42,16 @@ test("registerChatTools registers read-chat tool", () => {
 
   registerChatTools(factory, getBot, messageStore);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const readChatCall = toolCalls.find((call) => call.args[0] === "read-chat");
 
   expect(readChatCall).toBeTruthy();
-  expect(readChatCall!.args[1]).toBe("Get recent chat messages from players");
+  expect(readChatCall!.args[1].description).toBe("Get recent chat messages from players");
 });
 
 test("send-chat calls bot.chat with message", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -66,9 +66,9 @@ test("send-chat calls bot.chat with message", async () => {
 
   registerChatTools(factory, getBot, messageStore);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const sendChatCall = toolCalls.find((call) => call.args[0] === "send-chat");
-  const executor = sendChatCall!.args[3];
+  const executor = sendChatCall!.args[2];
 
   const result = await executor({ message: "Hello world" });
 
@@ -78,7 +78,7 @@ test("send-chat calls bot.chat with message", async () => {
 
 test("read-chat returns no messages when empty", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -91,9 +91,9 @@ test("read-chat returns no messages when empty", async () => {
 
   registerChatTools(factory, getBot, messageStore);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const readChatCall = toolCalls.find((call) => call.args[0] === "read-chat");
-  const executor = readChatCall!.args[3];
+  const executor = readChatCall!.args[2];
 
   const result = await executor({});
 
@@ -102,7 +102,7 @@ test("read-chat returns no messages when empty", async () => {
 
 test("read-chat returns formatted messages", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -118,9 +118,9 @@ test("read-chat returns formatted messages", async () => {
 
   registerChatTools(factory, getBot, messageStore);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const readChatCall = toolCalls.find((call) => call.args[0] === "read-chat");
-  const executor = readChatCall!.args[3];
+  const executor = readChatCall!.args[2];
 
   const result = await executor({ count: 10 });
 
@@ -133,7 +133,7 @@ test("read-chat returns formatted messages", async () => {
 
 test("read-chat respects count parameter", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -150,9 +150,9 @@ test("read-chat respects count parameter", async () => {
 
   registerChatTools(factory, getBot, messageStore);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const readChatCall = toolCalls.find((call) => call.args[0] === "read-chat");
-  const executor = readChatCall!.args[3];
+  const executor = readChatCall!.args[2];
 
   const result = await executor({ count: 5 });
 
@@ -161,7 +161,7 @@ test("read-chat respects count parameter", async () => {
 
 test("read-chat limits count to max messages", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -178,9 +178,9 @@ test("read-chat limits count to max messages", async () => {
 
   registerChatTools(factory, getBot, messageStore);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const readChatCall = toolCalls.find((call) => call.args[0] === "read-chat");
-  const executor = readChatCall!.args[3];
+  const executor = readChatCall!.args[2];
 
   const result = await executor({ count: 200 });
 

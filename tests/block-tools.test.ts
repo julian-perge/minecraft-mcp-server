@@ -9,7 +9,7 @@ import { Vec3 } from "vec3";
 
 test("registerBlockTools registers place-block tool", () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -20,16 +20,16 @@ test("registerBlockTools registers place-block tool", () => {
 
   registerBlockTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const placeBlockCall = toolCalls.find((call) => call.args[0] === "place-block");
 
   expect(placeBlockCall).toBeTruthy();
-  expect(placeBlockCall!.args[1]).toBe("Place a block at the specified position");
+  expect(placeBlockCall!.args[1].description).toBe("Place a block at the specified position");
 });
 
 test("registerBlockTools registers dig-block tool", () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -40,16 +40,16 @@ test("registerBlockTools registers dig-block tool", () => {
 
   registerBlockTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const digBlockCall = toolCalls.find((call) => call.args[0] === "dig-block");
 
   expect(digBlockCall).toBeTruthy();
-  expect(digBlockCall!.args[1]).toBe("Dig a block at the specified position");
+  expect(digBlockCall!.args[1].description).toBe("Dig a block at the specified position");
 });
 
 test("registerBlockTools registers get-block-info tool", () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -60,16 +60,18 @@ test("registerBlockTools registers get-block-info tool", () => {
 
   registerBlockTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const getBlockInfoCall = toolCalls.find((call) => call.args[0] === "get-block-info");
 
   expect(getBlockInfoCall).toBeTruthy();
-  expect(getBlockInfoCall!.args[1]).toBe("Get information about a block at the specified position");
+  expect(getBlockInfoCall!.args[1].description).toBe(
+    "Get information about a block at the specified position",
+  );
 });
 
 test("registerBlockTools registers find-blocks tool", () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -80,16 +82,18 @@ test("registerBlockTools registers find-blocks tool", () => {
 
   registerBlockTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const findBlockCall = toolCalls.find((call) => call.args[0] === "find-blocks");
 
   expect(findBlockCall).toBeTruthy();
-  expect(findBlockCall!.args[1]).toBe("Find one or more nearby blocks of a specific type");
+  expect(findBlockCall!.args[1].description).toBe(
+    "Find one or more nearby blocks of a specific type",
+  );
 });
 
 test("get-block-info returns block information", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -108,9 +112,9 @@ test("get-block-info returns block information", async () => {
 
   registerBlockTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const getBlockInfoCall = toolCalls.find((call) => call.args[0] === "get-block-info");
-  const executor = getBlockInfoCall!.args[3];
+  const executor = getBlockInfoCall!.args[2];
 
   const result = await executor({ x: 10, y: 64, z: 20 });
 
@@ -122,7 +126,7 @@ test("get-block-info returns block information", async () => {
 
 test("get-block-info handles missing block", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -136,9 +140,9 @@ test("get-block-info handles missing block", async () => {
 
   registerBlockTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const getBlockInfoCall = toolCalls.find((call) => call.args[0] === "get-block-info");
-  const executor = getBlockInfoCall!.args[3];
+  const executor = getBlockInfoCall!.args[2];
 
   const result = await executor({ x: 10, y: 64, z: 20 });
 
@@ -147,7 +151,7 @@ test("get-block-info handles missing block", async () => {
 
 test("dig-block handles air blocks", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -164,9 +168,9 @@ test("dig-block handles air blocks", async () => {
 
   registerBlockTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const digBlockCall = toolCalls.find((call) => call.args[0] === "dig-block");
-  const executor = digBlockCall!.args[3];
+  const executor = digBlockCall!.args[2];
 
   const result = await executor({ x: 10, y: 64, z: 20 });
 
@@ -175,7 +179,7 @@ test("dig-block handles air blocks", async () => {
 
 test("place-block blocks placing at bot position and one block above", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -190,9 +194,9 @@ test("place-block blocks placing at bot position and one block above", async () 
 
   registerBlockTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const placeBlockCall = toolCalls.find((call) => call.args[0] === "place-block");
-  const executor = placeBlockCall!.args[3];
+  const executor = placeBlockCall!.args[2];
 
   const resultAtFeet = await executor({ x: 10, y: 64, z: 20 });
   const resultAtHead = await executor({ x: 10, y: 65, z: 20 });
@@ -203,7 +207,7 @@ test("place-block blocks placing at bot position and one block above", async () 
 
 test("place-block floors input coordinates before self-placement guard", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -218,9 +222,9 @@ test("place-block floors input coordinates before self-placement guard", async (
 
   registerBlockTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const placeBlockCall = toolCalls.find((call) => call.args[0] === "place-block");
-  const executor = placeBlockCall!.args[3];
+  const executor = placeBlockCall!.args[2];
 
   const result = await executor({ x: 10.4, y: 64, z: 20.7 });
 
@@ -229,7 +233,7 @@ test("place-block floors input coordinates before self-placement guard", async (
 
 test("find-blocks returns not found when block not found", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -244,9 +248,9 @@ test("find-blocks returns not found when block not found", async () => {
 
   registerBlockTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const findBlockCall = toolCalls.find((call) => call.args[0] === "find-blocks");
-  const executor = findBlockCall!.args[3];
+  const executor = findBlockCall!.args[2];
 
   const result = await executor({ blockType: "diamond_ore", maxDistance: 16 });
 
@@ -255,7 +259,7 @@ test("find-blocks returns not found when block not found", async () => {
 
 test("find-blocks returns multiple results when count is greater than one", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -271,9 +275,9 @@ test("find-blocks returns multiple results when count is greater than one", asyn
 
   registerBlockTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const findBlockCall = toolCalls.find((call) => call.args[0] === "find-blocks");
-  const executor = findBlockCall!.args[3];
+  const executor = findBlockCall!.args[2];
 
   const result = await executor({ blockType: "stone", maxDistance: 16, count: 2 });
 
@@ -284,7 +288,7 @@ test("find-blocks returns multiple results when count is greater than one", asyn
 
 test("find-blocks clamps oversized count before calling bot.findBlocks", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -301,9 +305,9 @@ test("find-blocks clamps oversized count before calling bot.findBlocks", async (
 
   registerBlockTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const findBlockCall = toolCalls.find((call) => call.args[0] === "find-blocks");
-  const executor = findBlockCall!.args[3];
+  const executor = findBlockCall!.args[2];
 
   await executor({ blockType: "stone", maxDistance: 16, count: 10_000 });
 

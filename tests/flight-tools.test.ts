@@ -9,7 +9,7 @@ import { Vec3 } from "vec3";
 
 test("registerFlightTools registers fly-to tool", () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -20,16 +20,16 @@ test("registerFlightTools registers fly-to tool", () => {
 
   registerFlightTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const flyToCall = toolCalls.find((call) => call.args[0] === "fly-to");
 
   expect(flyToCall).toBeTruthy();
-  expect(flyToCall!.args[1]).toBe("Make the bot fly to a specific position");
+  expect(flyToCall!.args[1].description).toBe("Make the bot fly to a specific position");
 });
 
 test("fly-to successfully flies to destination", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -51,9 +51,9 @@ test("fly-to successfully flies to destination", async () => {
 
   registerFlightTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const flyToCall = toolCalls.find((call) => call.args[0] === "fly-to");
-  const executor = flyToCall!.args[3];
+  const executor = flyToCall!.args[2];
 
   const result = await executor({ x: 100, y: 80, z: 200 });
 
@@ -65,7 +65,7 @@ test("fly-to successfully flies to destination", async () => {
 
 test("fly-to returns error when creative mode not available", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -79,9 +79,9 @@ test("fly-to returns error when creative mode not available", async () => {
 
   registerFlightTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const flyToCall = toolCalls.find((call) => call.args[0] === "fly-to");
-  const executor = flyToCall!.args[3];
+  const executor = flyToCall!.args[2];
 
   const result = await executor({ x: 100, y: 80, z: 200 });
 
@@ -90,7 +90,7 @@ test("fly-to returns error when creative mode not available", async () => {
 
 test("fly-to handles flight errors", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -112,9 +112,9 @@ test("fly-to handles flight errors", async () => {
 
   registerFlightTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const flyToCall = toolCalls.find((call) => call.args[0] === "fly-to");
-  const executor = flyToCall!.args[3];
+  const executor = flyToCall!.args[2];
 
   const result = await executor({ x: 100, y: 80, z: 200 });
 

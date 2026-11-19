@@ -9,7 +9,7 @@ import { Vec3 } from "vec3";
 
 test("registerPositionTools registers get-position tool", () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -20,16 +20,16 @@ test("registerPositionTools registers get-position tool", () => {
 
   registerPositionTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const getPositionCall = toolCalls.find((call) => call.args[0] === "get-position");
 
   expect(getPositionCall).toBeTruthy();
-  expect(getPositionCall!.args[1]).toBe("Get the current position of the bot");
+  expect(getPositionCall!.args[1].description).toBe("Get the current position of the bot");
 });
 
 test("registerPositionTools registers move-to-position tool", () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -40,16 +40,16 @@ test("registerPositionTools registers move-to-position tool", () => {
 
   registerPositionTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const moveToPositionCall = toolCalls.find((call) => call.args[0] === "move-to-position");
 
   expect(moveToPositionCall).toBeTruthy();
-  expect(moveToPositionCall!.args[1]).toBe("Move the bot to a specific position");
+  expect(moveToPositionCall!.args[1].description).toBe("Move the bot to a specific position");
 });
 
 test("get-position returns current bot position", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -65,9 +65,9 @@ test("get-position returns current bot position", async () => {
 
   registerPositionTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const getPositionCall = toolCalls.find((call) => call.args[0] === "get-position");
-  const executor = getPositionCall!.args[3];
+  const executor = getPositionCall!.args[2];
 
   const result = await executor({});
 
@@ -78,7 +78,7 @@ test("get-position returns current bot position", async () => {
 
 test("move-to-position returns error when pathfinding fails", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -98,9 +98,9 @@ test("move-to-position returns error when pathfinding fails", async () => {
 
   registerPositionTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const moveToPositionCall = toolCalls.find((call) => call.args[0] === "move-to-position");
-  const executor = moveToPositionCall!.args[3];
+  const executor = moveToPositionCall!.args[2];
 
   const result = await executor({ x: 100, y: 64, z: 200 });
 
@@ -112,7 +112,7 @@ test("move-to-position returns timeout error and stops pathfinder", async () => 
   const clock = sinon.useFakeTimers();
   try {
     const mockServer = {
-      tool: sinon.stub(),
+      registerTool: sinon.stub(),
     } as unknown as McpServer;
     const mockConnection = {
       checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -129,9 +129,9 @@ test("move-to-position returns timeout error and stops pathfinder", async () => 
 
     registerPositionTools(factory, getBot);
 
-    const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+    const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
     const moveToPositionCall = toolCalls.find((call) => call.args[0] === "move-to-position");
-    const executor = moveToPositionCall!.args[3];
+    const executor = moveToPositionCall!.args[2];
 
     const resultPromise = executor({ x: 100, y: 64, z: 200, timeoutMs: 1000 });
     await clock.tickAsync(1000);
@@ -147,7 +147,7 @@ test("move-to-position returns timeout error and stops pathfinder", async () => 
 
 test("move-to-position succeeds without timeout and does not stop pathfinder", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -164,9 +164,9 @@ test("move-to-position succeeds without timeout and does not stop pathfinder", a
 
   registerPositionTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const moveToPositionCall = toolCalls.find((call) => call.args[0] === "move-to-position");
-  const executor = moveToPositionCall!.args[3];
+  const executor = moveToPositionCall!.args[2];
 
   const result = await executor({ x: 100, y: 64, z: 200 });
 
@@ -179,7 +179,7 @@ test("move-to-position succeeds before timeout and does not stop pathfinder", as
   const clock = sinon.useFakeTimers();
   try {
     const mockServer = {
-      tool: sinon.stub(),
+      registerTool: sinon.stub(),
     } as unknown as McpServer;
     const mockConnection = {
       checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -196,9 +196,9 @@ test("move-to-position succeeds before timeout and does not stop pathfinder", as
 
     registerPositionTools(factory, getBot);
 
-    const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+    const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
     const moveToPositionCall = toolCalls.find((call) => call.args[0] === "move-to-position");
-    const executor = moveToPositionCall!.args[3];
+    const executor = moveToPositionCall!.args[2];
 
     const result = await executor({ x: 100, y: 64, z: 200, timeoutMs: 1000 });
     await clock.tickAsync(1000);
@@ -213,7 +213,7 @@ test("move-to-position succeeds before timeout and does not stop pathfinder", as
 
 test("move-to-position preserves pathfinder error when not timing out", async () => {
   const mockServer = {
-    tool: sinon.stub(),
+    registerTool: sinon.stub(),
   } as unknown as McpServer;
   const mockConnection = {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true }),
@@ -236,9 +236,9 @@ test("move-to-position preserves pathfinder error when not timing out", async ()
 
   registerPositionTools(factory, getBot);
 
-  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const toolCalls = (mockServer.registerTool as sinon.SinonStub).getCalls();
   const moveToPositionCall = toolCalls.find((call) => call.args[0] === "move-to-position");
-  const executor = moveToPositionCall!.args[3];
+  const executor = moveToPositionCall!.args[2];
 
   const result = await executor({ x: 100, y: 64, z: 200, timeoutMs: 5000 });
 
