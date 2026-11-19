@@ -22,8 +22,8 @@ a recipe stops with a message when a tool it needs is missing.
   runs them twice and keeps their fixes.
 - `just test` runs the unit tests. `just test tests/chat-tools.test.ts`
   runs one file.
-- `just dev` builds the server and starts it in Node. Arguments pass through, for
-  example `just dev --port 25566`.
+- `just dev` builds the server and starts it in Node. Arguments pass
+  through, for example `just dev --port 25566`.
 
 ## Setup
 
