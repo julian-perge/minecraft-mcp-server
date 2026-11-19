@@ -26,7 +26,7 @@ require +tools:
     fi
 
 # The lint recipe runs the type check too, through the bun-check hook in prek.toml.
-[doc('Run the gate that proves a change: lint, type check, unit tests and build')]
+[doc('Run the gate that proves a change: lint, type check, unit tests, build and a start in Node')]
 [group('check')]
 check: lint test build smoke
 
@@ -54,7 +54,7 @@ test *files: (require "bun")
 # bun runs the unit tests and resolves CommonJS imports that Node refuses, so this loads the built server in Node, the runtime that users run.
 [doc('Start the built server in Node with --help, which loads every module and exits')]
 [group('check')]
-smoke: (require "node")
+smoke: (require "node") build
     node dist/main.js --help > /dev/null
 
 [doc('Compile src into dist/')]
@@ -78,7 +78,7 @@ ingame version *flags: (require "bun" "node" "java") build
 ingame-all: (require "bun" "node" "java") build
     bun scripts/ingame-check.ts 1.21.11
     bun scripts/ingame-check.ts 26.1.2
-    bun scripts/ingame-check.ts 26.3 --expect-refusal
+    bun scripts/ingame-check.ts 26.3
 
 [doc('Download a vanilla server jar into the cache, check its SHA-1 and print its path')]
 [group('ingame')]

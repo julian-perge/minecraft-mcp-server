@@ -21,7 +21,7 @@ import {
   parseJavaMajor,
   serverProperties,
 } from "./ingame-lib.js";
-import { supportedVersionNames } from "../src/minecraft-versions.js";
+import { supportedVersionNames, UNSUPPORTED_VERSIONS } from "../src/minecraft-versions.js";
 import { resolveServerJar } from "./server-jar.js";
 
 const USERNAME = "CheckBot";
@@ -52,7 +52,11 @@ function parseCli() {
     },
   });
   if (positionals.length !== 1) throw new Error(usage);
-  return { version: positionals[0], ...values };
+  const version = positionals[0];
+  // A version on the unsupported list can only pass the refusal check, so `just ingame 26.3` runs that check without the flag.
+  const expectRefusal =
+    values["expect-refusal"] || UNSUPPORTED_VERSIONS.some((entry) => entry.version === version);
+  return { ...values, version, "expect-refusal": expectRefusal };
 }
 try {
   args = parseCli();

@@ -5,10 +5,13 @@ import { SUPPORTED_VERSIONS, UNSUPPORTED_VERSIONS } from "../src/minecraft-versi
 const supported = SUPPORTED_VERSIONS.map((entry) => entry.version);
 const unsupported = UNSUPPORTED_VERSIONS.map((entry) => entry.version);
 
-function tableRows(path: string, heading: string): string[][] {
+function section(path: string, heading: string): string {
   const text = readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
-  const section = text.split(`## ${heading}`)[1]?.split("\n## ")[0] ?? "";
-  return section
+  return text.split(`## ${heading}`)[1]?.split("\n## ")[0] ?? "";
+}
+
+function tableRows(path: string, heading: string): string[][] {
+  return section(path, heading)
     .split("\n")
     .filter(
       (line) => line.startsWith("| ") && !line.startsWith("| ---") && !line.startsWith("| Version"),
@@ -46,4 +49,14 @@ test("docs/verification.md has a passed game check for each supported version an
   }
   expect(byVersion.get("26.3")?.check).toBe("refusal");
   expect(byVersion.get("26.3")?.result).toMatch(/^(\d+) of \1 passed$/);
+});
+
+test("AGENTS.md claims the versions in the supported list", () => {
+  const text = section("AGENTS.md", "Minecraft versions").replace(/\s+/g, " ");
+  const names =
+    supported.length === 1
+      ? supported[0]
+      : `${supported.slice(0, -1).join(", ")} and ${supported.at(-1)}`;
+
+  expect(text).toContain(`The bot supports Minecraft ${names}.`);
 });

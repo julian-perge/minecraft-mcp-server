@@ -7,8 +7,10 @@ This file records the last in-game check of each Minecraft version in `src/minec
 ```bash
 just ingame 1.21.11
 just ingame 26.1.2
-just ingame 26.3 --expect-refusal
+just ingame 26.3
 ```
+
+26.3 is on the unsupported list in `src/minecraft-versions.ts`, so its run checks the refusal. `--expect-refusal` runs the refusal check against any other version.
 
 `just ingame-all` runs all three in that order. Each run downloads the vanilla server jar into `MC_SERVER_CACHE` (default `~/.cache/minecraft-mcp-server/servers`) once and checks its SHA-1. It starts the server in offline mode on a flat world in a temporary folder, starts `node dist/main.js` through the MCP SDK client, calls every tool the server lists, and checks world state with server console commands. `--report <file>` writes the results as JSON.
 
