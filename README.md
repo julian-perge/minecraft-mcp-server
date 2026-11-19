@@ -18,7 +18,7 @@ The bot pings the server before it joins. It joins only a server that uses the p
 ## Requirements
 
 - [bun](https://bun.sh) 1.4.4 or later, to install and build. bun is the only package manager, see [ADR 0002](docs/adr/0002-bun-is-the-only-package-manager.md).
-- Node 22 or later. The server runs on Node.
+- Node 22.12 or later. The server runs on Node.
 - [just](https://just.systems), to run the recipes.
 - [prek](https://prek.j178.dev) 0.5.0 or later, for the lint in `just check`.
 - A Minecraft Java server with `online-mode=false` in `server.properties`. The bot joins without a Microsoft account, so a server in online mode refuses it.

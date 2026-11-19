@@ -4,7 +4,7 @@ Work on this repo goes through GitHub issues on julian-perge/minecraft-mcp-serve
 
 ## Set up
 
-Install bun 1.4.4 or later, Node 22 or later, [just](https://just.systems) and [prek](https://prek.j178.dev) 0.5.0 or later. Then:
+Install bun 1.4.4 or later, Node 22.12 or later, [just](https://just.systems) and [prek](https://prek.j178.dev) 0.5.0 or later. Then:
 
 ```bash
 just install

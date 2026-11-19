@@ -19,7 +19,7 @@ a recipe stops with a message when a tool it needs is missing.
   `docs/verification.md`. `just ingame-all` runs every version. It needs
   Java, and it downloads the server jar once into `MC_SERVER_CACHE`.
 - `just lint` runs the prek hooks in `prek.toml` on every file. `just fmt`
-  runs them twice and keeps their fixes.
+  runs them, runs them again when the first run fails, and keeps their fixes.
 - `just test` runs the unit tests. `just test tests/chat-tools.test.ts`
   runs one file.
 - `just dev` builds the server and starts it in Node. Arguments pass
@@ -27,8 +27,8 @@ a recipe stops with a message when a tool it needs is missing.
 
 ## Setup
 
-- Install bun 1.4.4 or later, Node 22 or later, `just` and `prek` 0.5.0 or
-  later. bun is the only package manager and runs the tests and scripts. The
+- Install bun 1.4.4 or later, Node 22.12 or later, `just` and `prek` 0.5.0
+  or later. bun is the only package manager and runs the tests and scripts. The
   server itself runs on Node. See
   `docs/adr/0002-bun-is-the-only-package-manager.md`.
 - The in-game check also needs Java 21 or later for 1.21.11, and Java 25 or

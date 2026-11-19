@@ -26,7 +26,8 @@ has been checked to run it.
   `"packageManager": "bun@1.4.4"`, and `bun.lock` is the only lockfile.
 - `package-lock.json` is deleted. No doc, script or recipe names npm as a
   fallback.
-- The server runs on Node 22 or later. `engines.node` says so. bun installs
+- The server runs on Node 22.12 or later. `engines.node` says so. mineflayer
+  needs 22, and yargs 18.2, oxlint and oxfmt need 22.12. bun installs
   the dependencies and runs the tests and scripts.
 - The `prepare` script is removed. Users install from a clone with
   `just install` and `just build`, and point their MCP client at
@@ -59,5 +60,5 @@ has been checked to run it.
 ## Consequences
 
 - A dependency change updates `bun.lock` only.
-- Contributors install bun 1.4.4 or later and Node 22 or later.
+- Contributors install bun 1.4.4 or later and Node 22.12 or later.
 - The MCP client config needs the path of a local clone.
