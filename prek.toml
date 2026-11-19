@@ -8,6 +8,8 @@ hooks = [
   { id = "check-case-conflict" },
   { id = "check-merge-conflict" },
   { id = "check-executables-have-shebangs" },
+  # src/main.ts keeps its shebang so that tsc copies it into dist/main.js, the file that runs. The source file itself never runs.
+  { id = "check-shebang-scripts-are-executable", exclude = '^src/main\.ts$' },
   { id = "check-json" },
   { id = "check-yaml" },
   { id = "detect-private-key" },
@@ -23,6 +25,6 @@ repo = "local"
 [[repos.hooks]]
 id = "eslint"
 name = "eslint"
-entry = "npx eslint"
+entry = "npx --no eslint"
 language = "system"
 types = ["ts"]

@@ -45,5 +45,5 @@ pids/
 # REPL history
 .node_repl_history
 
-# Claude Code configuration
-.claude
+# Claude Code's local settings, such as the line that enables the agent-skills plugin, stay on this machine.
+/.claude/settings.local.json
