@@ -77,6 +77,18 @@ test("refuses NBT that has no palette or blocks", async () => {
   await expect(parseStructure(data)).rejects.toThrow("it needs size, palette and blocks");
 });
 
+test("refuses a gzip file that unpacks to more than the limit", async () => {
+  await expect(parseStructure(structureNbt([1, 1, 1], blocks), 16)).rejects.toThrow(
+    "The file does not unpack to at most 16 bytes of NBT",
+  );
+});
+
+test("refuses a path that is not a regular file", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "structure-file-"));
+
+  await expect(readStructureFile(dir)).rejects.toThrow("is not a regular file");
+});
+
 test("refuses a missing file with the system error", async () => {
   await expect(readStructureFile("/nonexistent/house.nbt")).rejects.toThrow("ENOENT");
 });
