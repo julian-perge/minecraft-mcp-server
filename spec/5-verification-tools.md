@@ -10,7 +10,7 @@ An agent that builds a datapack, a world-generation change or a structure can pr
 
 The research for #5 is in ADR 0004. In short:
 
-- Structure Lab is a NeoForge mod with a client-only HTTP bridge. Its lab world is a singleplayer world preset that freezes ticks, time, weather and mob spawns. The mod registers a block, an item and a block entity, and `neoforge.mods.toml` declares `side="BOTH"`, so a vanilla client, and so mineflayer, cannot join a world that runs it (a guess from the mod metadata, not checked against NeoForge source). Main targets 26.3, which mineflayer does not support. The `26.1.2` branch matches a supported version, but the client requirement, the singleplayer world, the offline-mode bot and the frozen ticks still stop a shared world.
+- Structure Lab is a NeoForge mod with a client-only HTTP bridge. Its lab world is a singleplayer world preset that freezes ticks, time, weather and mob spawns. The mod registers a block (the view pad), its block item and a block entity, so a vanilla client, and so mineflayer, cannot join a world that runs it (a guess from the mod's registrations, not checked against NeoForge source). Main targets 26.3, which mineflayer does not support. The `26.1.2` branch matches a supported version, but the client requirement, the singleplayer world, the offline-mode bot and the frozen ticks still stop a shared world.
 - So the bot and Structure Lab do not share a world, now or after mineflayer adds 26.3. Inside a lab world the bot would add little: Structure Lab's own `inspect_blocks` reads exact block states, and the checks that need a player body (walking, doors, spawn safety) need ticks, which the lab turns off.
 - The useful link is the export. Structure Lab exports clean NBT and a vanilla datapack with a `/place template` command. The bot can check that export on a vanilla server of a supported version, with ticks on.
 - Seven skills in minecraft-agent-skills ask for checks that need a player in a running game: minecraft-datapack, minecraft-world-generation, minecraft-worldedit-ops, minecraft-essentials-ops, minecraft-server-admin, minecraft-testing and minecraft-commands-scripting.
@@ -35,14 +35,14 @@ No new recipe. `just check` covers the unit tests. `just ingame <version>` cover
 - `src/tools/verification-tools.ts`: the four tools.
 - `src/block-compare.ts`: the comparison of expected blocks with the world.
 - `src/structure-file.ts`: the reader of structure template files.
-- `tests/verification-tools.test.ts`, `tests/block-compare.test.ts`, `tests/structure-file.test.ts`, with fixture `.nbt` files in `tests/fixtures/` written by the tests.
+- `tests/verification-tools.test.ts`, `tests/block-compare.test.ts`, `tests/structure-file.test.ts`, with fixture `.nbt` data that `scripts/structure-nbt.ts` writes into a temporary folder during the test.
 - `scripts/ingame-check.ts`: checks for the four tools.
 - `docs/adr/0004-verify-in-game-instead-of-sharing-a-lab-world.md`, `docs/verify-in-game.md`, README.md.
 
 ## Testing strategy
 
 - **Unit tests**: each tool through the real MCP SDK client (`tests/helpers/mcp-client.ts`) with a stub bot. The structure reader against fixture files in both palette spellings, gzip and plain. The comparison against matches, mismatches, property differences and unloaded chunks.
-- **In game** (`just ingame 1.21.11`, `just ingame 26.1.2`): `run-command` with `/time query daytime`; `check-blocks` after `/setblock`; `verify-structure` with a template that the check writes into the world's `generated` folder and places with `/place template`, then again after one block changes; `can-reach` to an open position and to a sealed one.
+- **In game** (`just ingame 1.21.11`, `just ingame 26.1.2`): `run-command` with `/seed`, whose reply is the same on both versions; `check-blocks` after `/setblock`; `verify-structure` with a template that the check puts in a datapack in the world's `datapacks` folder and places with `/place template`, then again after one block changes; `can-reach` to an open position and to a sealed one.
 
 ## Boundaries
 

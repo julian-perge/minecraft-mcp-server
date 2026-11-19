@@ -494,7 +494,7 @@ function gameChecks(): Check[] {
         const fail = await expectTool(
           "check-blocks",
           { blocks: [{ x: 8, y: -60, z: 8, block: "oak_stairs", properties: { facing: "west" } }] },
-          /^FAIL: 0 of 1 blocks match, 1 differ/,
+          /^FAIL: 0 of 1 block matches, 1 differs\./,
         );
         return `${pass} ${fail}`;
       },

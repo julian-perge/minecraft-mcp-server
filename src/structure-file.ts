@@ -86,6 +86,12 @@ export async function parseStructure(
     );
   }
 
+  // /place template picks one of several palettes at random, so the file cannot say which blocks the world should have.
+  if (!template.palette && template.palettes && template.palettes.length > 1) {
+    throw new Error(
+      `The structure has ${template.palettes.length} palettes, and /place template picks one at random, so it cannot be compared block by block.`,
+    );
+  }
   const palette = template.palette ?? template.palettes?.[0];
   if (!template.size || !palette || !template.blocks) {
     throw new Error("The file is not a structure template: it needs size, palette and blocks.");

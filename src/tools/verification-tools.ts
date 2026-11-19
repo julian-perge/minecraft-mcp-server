@@ -1,8 +1,14 @@
+import { isAbsolute } from "node:path";
 import type mineflayer from "mineflayer";
 import pathfinderPkg, { type Movements } from "mineflayer-pathfinder";
 import { setImmediate as nextTurn } from "node:timers/promises";
 import { z } from "zod";
-import { compareBlocks, formatReport, type ExpectedBlock } from "../block-compare.js";
+import {
+  compareBlocks,
+  formatReport,
+  type ExpectedBlock,
+  type WorldHeight,
+} from "../block-compare.js";
 import { readStructureFile } from "../structure-file.js";
 import type { ToolFactory } from "../tool-factory.js";
 
@@ -30,13 +36,21 @@ const maxListed = z.coerce
   .default(MAX_LISTED)
   .describe("How many differing blocks to list at most");
 
+// mineflayer's game plugin sets minY and height from the dimension (lib/plugins/game.js), but its GameState type leaves them out.
+function worldHeight(bot: mineflayer.Bot): WorldHeight | undefined {
+  const game = bot.game as (mineflayer.GameState & Partial<WorldHeight>) | undefined;
+  return game?.minY !== undefined && game.height !== undefined
+    ? { minY: game.minY, height: game.height }
+    : undefined;
+}
+
 export function registerVerificationTools(
   factory: ToolFactory,
   getBot: () => mineflayer.Bot,
 ): void {
   factory.registerTool(
     "run-command",
-    "Run one server command as the bot and return the system messages that arrive within the wait time. The server's permissions decide which commands the bot may run, and most need the bot to be an operator.",
+    "Run one server command as the bot and return the messages that arrive within the wait time: the command's replies, and any chat that arrives meanwhile. The server's permissions decide which commands the bot may run, and most need the bot to be an operator.",
     {
       command: z
         .string()
@@ -66,7 +80,7 @@ export function registerVerificationTools(
       const bot = getBot();
       const text = command.startsWith("/") ? command : `/${command}`;
       const messages: string[] = [];
-      // Command replies arrive as system messages. The action bar (game_info) also uses that path but is never a reply, so it is left out.
+      // Command replies arrive as system messages, and chat during the wait comes along, because a /say echo is a chat message too. The action bar (game_info) also uses this event but is never a reply, so it is left out.
       const collect = (message: string, position: string) => {
         if (position !== "game_info") {
           messages.push(message);
@@ -83,7 +97,7 @@ export function registerVerificationTools(
 
       const shown = messages.slice(0, MAX_MESSAGES);
       const lines = [
-        `Sent ${text}. ${messages.length === 0 ? "No messages" : `${messages.length} messages`} arrived within ${waitMs} ms.`,
+        `Sent ${text}. ${messages.length === 0 ? "No messages" : messages.length === 1 ? "1 message" : `${messages.length} messages`} arrived within ${waitMs} ms.`,
         ...shown.map((message) => `- ${message}`),
       ];
       if (messages.length > shown.length) {
@@ -124,7 +138,7 @@ export function registerVerificationTools(
         ...rest,
         name: block,
       }));
-      const report = compareBlocks(expected, (position) => bot.blockAt(position));
+      const report = compareBlocks(expected, (position) => bot.blockAt(position), worldHeight(bot));
       return factory.createResponse(formatReport(report, maxListed));
     },
   );
@@ -133,7 +147,11 @@ export function registerVerificationTools(
     "verify-structure",
     "Compare a structure template .nbt file, such as a Structure Lab export, with the blocks in the world where it was placed. The origin is the position that /place template used. Answers PASS or FAIL first, then lists the blocks that differ.",
     {
-      path: z.string().min(1).describe("Absolute path of the .nbt structure template file"),
+      path: z
+        .string()
+        .min(1)
+        .refine((value) => isAbsolute(value), "Give an absolute path")
+        .describe("Absolute path of the .nbt structure template file"),
       x: coordinate.describe("X of the origin where the template was placed"),
       y: coordinate.describe("Y of the origin where the template was placed"),
       z: coordinate.describe("Z of the origin where the template was placed"),
@@ -148,7 +166,7 @@ export function registerVerificationTools(
         y: y + block.y,
         z: originZ + block.z,
       }));
-      const report = compareBlocks(expected, (position) => bot.blockAt(position));
+      const report = compareBlocks(expected, (position) => bot.blockAt(position), worldHeight(bot));
       const [sizeX, sizeY, sizeZ] = template.size;
       return factory.createResponse(
         `${formatReport(report, maxListed)}\nTemplate: ${path}, size ${sizeX} x ${sizeY} x ${sizeZ}, origin (${x}, ${y}, ${originZ}).`,
@@ -199,7 +217,7 @@ export function registerVerificationTools(
       const from = `(${start.x}, ${start.y}, ${start.z})`;
       const verdict = result.status === "success" ? "PASS" : "FAIL";
       return factory.createResponse(
-        `${verdict}: the path from ${from} to within ${range} blocks of ${target} is ${result.status}, with ${result.path.length} steps.`,
+        `${verdict}: the path from ${from} to within ${range} ${range === 1 ? "block" : "blocks"} of ${target} is ${result.status}, with ${result.path.length} steps.`,
       );
     },
   );

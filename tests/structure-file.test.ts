@@ -92,3 +92,18 @@ test("refuses a path that is not a regular file", async () => {
 test("refuses a missing file with the system error", async () => {
   await expect(readStructureFile("/nonexistent/house.nbt")).rejects.toThrow("ENOENT");
 });
+
+test("refuses a template with several palettes, since /place template picks one at random", async () => {
+  const stonePalette = { type: "compound", value: [{ Name: nbt.string("minecraft:stone") }] };
+  const root = nbt.comp(
+    {
+      size: nbt.list(nbt.int([1, 1, 1])),
+      palettes: { type: "list", value: { type: "list", value: [stonePalette, stonePalette] } },
+      blocks: nbt.list(nbt.comp([{ pos: nbt.list(nbt.int([0, 0, 0])), state: nbt.int(0) }])),
+    },
+    "",
+  );
+  const data = nbt.writeUncompressed(root as unknown as nbt.NBT, "big");
+
+  await expect(parseStructure(data)).rejects.toThrow("The structure has 2 palettes");
+});

@@ -38,16 +38,16 @@ Structure Lab's `export_structure` tool returns a clean `.nbt` file, a vanilla d
 1. Copy the datapack zip into the `datapacks` folder of a vanilla 26.1.2 server's world.
 2. `run-command` with `{"command": "reload"}`. When the pack is not on yet, `run-command` with `{"command": "datapack enable \"file/house.zip\""}`, with the zip's file name.
 3. Move the bot near the place for the structure.
-4. `run-command` with `{"command": "place template lab_export:house 100 64 100"}`, the command from the export with a fixed position instead of `~ ~ ~`.
+4. `run-command` with `{"command": "place template lab_export:house 100 64 100"}`, the command from the export with a fixed position instead of `~ ~ ~`. Leave out the rotation and mirror arguments: `verify-structure` compares the template as it is in the file, with no rotation and no mirror.
 5. `verify-structure` with the exported file and the same position:
 
    ```json
    { "path": "/absolute/path/to/house.nbt", "x": 100, "y": 64, "z": 100 }
    ```
 
-   The answer lists each block that differs, with the expected and the found state.
+   The answer lists each block that differs, with the expected and the found state. A template with several palettes, such as a vanilla shipwreck, is refused, because `/place template` picks one of them at random.
 
-6. `can-reach` to each door or room that a player should reach, for example `{"x": 104, "y": 64, "z": 103}`. `can-reach` asks the pathfinder for a path and does not move the bot.
+6. `can-reach` to each room that a player should reach, for example `{"x": 104, "y": 64, "z": 103}`. `can-reach` asks the pathfinder for a path and does not move the bot. The pathfinder opens fence gates but not doors, so give the doorway as the target, or open the doors in the game first.
 
 ## A WorldEdit paste
 
