@@ -58,7 +58,7 @@ build: (require "bun")
 
 [doc('Start the server from source, for example: just dev --port 25566')]
 [group('run')]
-dev *args: (require "bun")
+dev *args: (require "bun" "node")
     bun run dev "$@"
 
 # bun.lock is the only lockfile (docs/adr/0002-bun-is-the-only-package-manager.md), so install never resolves new versions.
