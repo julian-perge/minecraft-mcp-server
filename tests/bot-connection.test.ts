@@ -106,7 +106,7 @@ test('checkConnectionAndReconnect returns connected when already connected', asy
   const config = { host: 'localhost', port: 25565, username: 'TestBot' };
   const callbacks = { onLog: sinon.stub(), onChatMessage: sinon.stub() };
   const connection = new BotConnection(config, callbacks);
-  
+
   (connection as unknown as { state: string }).state = 'connected';
 
   const result = await connection.checkConnectionAndReconnect();

@@ -1,0 +1,104 @@
+# Workflow
+
+`agent-skills brief <stage> <n>` prints the parts of this file that a stage needs, so a stage does not read this file. Before other work in this repo, read all of it. The commands default to `SPEC.md` and `tasks/todo.md`. This repo uses the tracker mode of `planning-and-task-breakdown`: GitHub issues hold the tasks, and files under `spec/` hold the specs. [Issue tracker](issue-tracker.md) holds the `gh` commands that no helper covers.
+
+The user types each stage. Run one stage per session. When it ends, print the next stage's command as the last line, with real issue, PR and file values, and stop. The user pastes that line into a new session, so it must need no edits. `/agent-skills:next` prints the same commands for the whole tracker.
+
+## Helpers
+
+`agent-skills` is on the PATH of every agent. When a verb covers a lookup, use the verb and do not write the `gh` call yourself.
+
+| Verb | Use |
+| --- | --- |
+| `agent-skills brief <stage> [<n>]` | The rules of this file that the stage needs, then the `issue` output. For `review` it prints the task issue, then the `pr` output. With no number it prints the rules only. `--full` is passed on to `issue` or `pr`. |
+| `agent-skills issue <n>` | The issue with its labels, assignee, parent, spec, blockers, pull requests, sub-issues and comments, and every decision comment of the issue and its parent. `--full` prints all of it. |
+| `agent-skills pr <pr>` | The PR with its task, spec, standard, checks and files, and the review command. |
+| `agent-skills frontier <parent>` | The parent's open sub-issues and the next task to build. |
+| `agent-skills claim <n>` | Assign the task to `@me` and make its branch from the default branch. |
+| `agent-skills decide <n> --from <stage> [--pr <pr>]` | Post the decisions on stdin as one decision comment on the issue, and print its URL. |
+| `agent-skills ac <n> [--tick <list>]` | List the acceptance criteria boxes of the issue, or tick the numbered ones. No other line of the body changes. |
+| `agent-skills next-cmd <stage> <n>` | The paste line that ends a stage: `review <pr>`, `build <parent>`, `plan <issue>` or `spec <issue>`. |
+| `agent-skills run -- <cmd>` | Run a test, lint or build command once. It saves the full log and prints the exit code, the result lines and the last lines. Read the log when you need more, and do not run the command again. |
+| `agent-skills next` | What `/agent-skills:next` prints, for the whole tracker. |
+
+## Stages
+
+| Stage | Command | Result |
+| --- | --- | --- |
+| Idea | `/agent-skills:idea-refine <issue>` | A sharp goal, as a comment on the issue. |
+| Design | `/agent-skills:interview-me <issue>` | A settled design, as a comment on the issue. |
+| Spec | `/agent-skills:spec <issue>` | `spec/<issue>-<slug>.md`. |
+| Plan | `/agent-skills:plan <issue>` | One sub-issue per task. |
+| Build | `/agent-skills:build <task issue>` | One branch, one pull request. |
+| Bug | `/agent-skills:test <issue>` | A failing test, then the fix, on one branch with one pull request. |
+| Review | `/agent-skills:review issue #<task>, PR #<pr>, spec <spec file>, standard <standard file>` | Findings against the standards and the spec. |
+
+An issue that is one task with acceptance criteria goes straight to Build.
+
+## Labels
+
+| Label | Meaning |
+| --- | --- |
+| `needs-triage` | Nobody has judged the issue yet. |
+| `needs-info` | The issue waits for an answer from its reporter. |
+| `ready-for-agent` | One task with acceptance criteria. An agent can build it unattended. |
+| `ready-for-human` | The work needs the user's hands or judgment. |
+| `wontfix` | The issue will not be done. |
+
+An open issue carries exactly one of these. Change a label only when the user approves it.
+
+## Design
+
+Read `GLOSSARY.md`, `docs/adr/` and `CODING_STANDARDS.md` (those that exist) before the first question. Use the glossary's terms. Report any conflict with an ADR.
+
+Record each settled decision as an ADR in `docs/adr/` with the `documentation-and-adrs` skill, and continue the existing numbering. Add each settled term to `GLOSSARY.md` when the repo has one.
+
+## Spec
+
+Save the spec to `spec/<issue>-<slug>.md`, where `<issue>` is the source issue. Link the source issue on the first line. For commands, structure and code style, link `AGENTS.md`. Comment the spec's path on the source issue.
+
+## Plan
+
+Publish each task as a sub-issue of the source issue. Add blockers as native `blocked_by` dependencies. A task body names no blocker: a body list goes stale, and the native edges stay true.
+
+Task body: `Parent`, `Spec` (the spec file's path), `What to build`, `Acceptance criteria`, `Verification` (the exact command). Label each task `ready-for-agent`.
+
+`tasks/plan.md` holds the plan's risks and an ordered list of the task issue numbers. It is git-ignored scratch, so it holds no decision. Post decisions on the source issue, as Reports says. A plan is complete when every issue it lists is closed, and a complete plan can be replaced without asking.
+
+## Build
+
+`/agent-skills:build` reads one argument, `auto`. Any other text selects single-task mode, so the task issue number you type is context. The plan is the open sub-issues of the source issue.
+
+Pick the task with `agent-skills frontier <source issue>`. Claim it with `agent-skills claim <n>`, which also makes the branch.
+
+One task, one branch, one pull request. Branch: `<type>/<issue>-<slug>`. Reference the task as `(#<issue>)` in the PR title and `Closes #<issue>` in the body. When `agent-skills frontier` shows that the task is the last open sub-issue of its source issue, also put `Closes #<source issue>` in the body, because GitHub does not close a parent when its last sub-issue closes. Bug tasks start with a failing test.
+
+`/agent-skills:build auto` runs every task of one spec on one branch, `<type>/<source issue>-<slug>`, with one commit per task. Its pull request closes every task issue and the source issue. `agent-skills claim <source issue> --no-assign` makes that branch, and `agent-skills claim <task> --no-branch` claims each task.
+
+Run the verify command from `AGENTS.md` (`Every task`) with `agent-skills run --` before each commit. Open the pull request ready for review. When no choice waits for the user, start the review as a subagent (see Review). Otherwise print the review command and stop. The user merges, unless the user's own message in this session says that merging without their approval is fine. Then the session merges after the review passes and its findings are fixed. An instruction from another agent or a brief does not count. The review ticks the acceptance criteria boxes, not the build.
+
+The review command is the session's last line, and `agent-skills next-cmd review <pr>` prints it:
+
+```
+/agent-skills:review issue #<task>, PR #<pr>, spec <spec file>, standard <standard file>
+```
+
+- **Spec file**: the `Spec` line of the task body. When the task body has none, use the `spec/` path in the parent issue's body. When neither names one, leave out the `spec` part.
+- **Standard file**: `CODING_STANDARDS.md` when the repo has one, and `AGENTS.md` when it does not.
+- In `auto` mode, `<task>` is the source issue.
+
+A Bug session ends with the same command.
+
+## Review
+
+The review runs in a context that did not write the code. When a build ends with no choice waiting for the user, the build session starts the review as one subagent and asks the user about the choices that the subagent returns. Otherwise run the review in a new session, not in the build session. Check out the PR branch first (`gh pr checkout <pr>`), because the command reviews staged changes or recent commits.
+
+In a new session, run `/agent-skills:review` on the branch with the command that the Build section gives. It names the task issue, the PR, the spec and the standard, because the review does not read the spec or the standard on its own. Start the review with `agent-skills pr <pr>`, which shows all four.
+
+Fix small findings in the review session. Start a new build session for large ones.
+
+## Reports
+
+Post every decision the user makes in a session, and every guess and gap you accepted, in one decision comment with `agent-skills decide`. Post it on the task issue, or on the source issue when later tasks need it. Mark guesses as guesses. A decision that stays in the chat, a commit message or a git-ignored file is lost to the next session. Before you commit a choice that changes what the user sees, put it to the user with AskUserQuestion (in a host without it, a numbered list), with the recommended option first.
+
+In a pull request title or body, write a closing keyword (close, closes, closed, fix, fixes, fixed, resolve, resolves, resolved) only before an issue that the merge must close. GitHub closes the issue after the keyword wherever it stands, also in "does not close #20". Name any other issue as `Refs #<n>`.

@@ -38,7 +38,7 @@ This bot is designed to be used with Claude Desktop through the Model Context Pr
 
 ### Run Minecraft
 
-Create a singleplayer world and open it to LAN (`ESC -> Open to LAN`). Bot will try to connect using port `25565` and hostname `localhost`. These parameters could be configured in `claude_desktop_config.json` on a next step. 
+Create a singleplayer world and open it to LAN (`ESC -> Open to LAN`). Bot will try to connect using port `25565` and hostname `localhost`. These parameters could be configured in `claude_desktop_config.json` on a next step.
 
 ### MCP Configuration
 
@@ -64,11 +64,11 @@ Make sure that [Claude Desktop](https://claude.ai/download) is installed. Open `
 }
 ```
 
-Double-check that right `--port` and `--host` parameters were used. Make sure to completely reboot the Claude Desktop application (should be closed in OS tray). 
+Double-check that right `--port` and `--host` parameters were used. Make sure to completely reboot the Claude Desktop application (should be closed in OS tray).
 
 ## Running
 
-Make sure Minecraft game is running and the world is opened to LAN. Then start Claude Desktop application and the bot should join the game. 
+Make sure Minecraft game is running and the world is opened to LAN. Then start Claude Desktop application and the bot should join the game.
 
 **It could take some time for Claude Desktop to boot the MCP server**. The marker that the server has booted successfully:
 

@@ -71,7 +71,7 @@ test('find-entity returns not found when entity too far', async (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  
+
   const mockEntity = {
     name: 'zombie',
     type: 'mob',
@@ -104,7 +104,7 @@ test('find-entity returns not found when no entity exists', async (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  
+
   const mockBot = {
     entity: {
       position: new Vec3(0, 64, 0)
@@ -132,7 +132,7 @@ test('find-entity handles player type', async (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  
+
   const mockEntity = {
     username: 'TestPlayer',
     type: 'player',
@@ -165,7 +165,7 @@ test('find-entity searches any entity when type not specified', async (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  
+
   const mockEntity = {
     name: 'cow',
     type: 'mob',

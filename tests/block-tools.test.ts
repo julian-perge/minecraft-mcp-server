@@ -95,7 +95,7 @@ test('get-block-info returns block information', async (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  
+
   const mockBlock = {
     name: 'stone',
     type: 1,
@@ -128,7 +128,7 @@ test('get-block-info handles missing block', async (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  
+
   const mockBot = {
     blockAt: sinon.stub().returns(null)
   } as Partial<mineflayer.Bot>;
@@ -153,7 +153,7 @@ test('dig-block handles air blocks', async (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  
+
   const mockBlock = {
     name: 'air'
   };
@@ -235,7 +235,7 @@ test('find-blocks returns not found when block not found', async (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  
+
   const mockBot = {
     version: '1.21',
     findBlock: sinon.stub().returns(null)
