@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test";
-import { coerceCoordinates } from "../src/tools/coordinate-utils.js";
+import { coerceCoordinates } from "../src/tools/coordinate-utils.ts";
 
 test("coerceCoordinates returns numeric values for numeric strings", () => {
   const result = coerceCoordinates(

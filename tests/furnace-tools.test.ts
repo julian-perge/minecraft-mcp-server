@@ -1,10 +1,10 @@
 import { test, expect } from "bun:test";
 import sinon from "sinon";
 import { EventEmitter } from "events";
-import { registerFurnaceTools } from "../src/tools/furnace-tools.js";
-import { ToolFactory } from "../src/tool-factory.js";
-import { connectTools, textOf } from "./helpers/mcp-client.js";
-import { BotConnection } from "../src/bot-connection.js";
+import { registerFurnaceTools } from "../src/tools/furnace-tools.ts";
+import { ToolFactory } from "../src/tool-factory.ts";
+import { connectTools, textOf } from "./helpers/mcp-client.ts";
+import { BotConnection } from "../src/bot-connection.ts";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type mineflayer from "mineflayer";
 import type { Item } from "prismarine-item";

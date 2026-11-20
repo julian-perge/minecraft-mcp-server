@@ -17,8 +17,7 @@ The bot pings the server before it joins. It joins only a server that uses the p
 
 ## Requirements
 
-- [bun](https://bun.sh) 1.4.4 or later, to install and build. bun is the only package manager, see [ADR 0002](docs/adr/0002-bun-is-the-only-package-manager.md).
-- Node 22.12 or later. The server runs on Node.
+- [bun](https://bun.sh) 1.4.4 or later. bun installs the dependencies and runs the server, see [ADR 0002](docs/adr/0002-bun-is-the-only-package-manager.md) and [ADR 0005](docs/adr/0005-the-server-runs-on-bun.md).
 - [just](https://just.systems), to run the recipes.
 - [prek](https://prek.j178.dev) 0.5.0 or later, for the lint in `just check`.
 - A Minecraft Java server with `online-mode=false` in `server.properties`. The bot joins without a Microsoft account, so a server in online mode refuses it.
@@ -29,10 +28,9 @@ The bot pings the server before it joins. It joins only a server that uses the p
 git clone https://github.com/julian-perge/minecraft-mcp-server.git
 cd minecraft-mcp-server
 just install
-just build
 ```
 
-`just build` writes the server to `dist/main.js`. The MCP client runs that file with Node.
+There is no build step. The MCP client runs `src/main.ts` with bun.
 
 ## Connect an MCP client
 
@@ -41,7 +39,7 @@ Use the absolute path of your clone in place of `/path/to/minecraft-mcp-server`.
 Claude Code:
 
 ```bash
-claude mcp add minecraft -- node /path/to/minecraft-mcp-server/dist/main.js --host localhost --port 25565 --username LLMBot
+claude mcp add minecraft -- bun /path/to/minecraft-mcp-server/src/main.ts --host localhost --port 25565 --username LLMBot
 ```
 
 Claude Desktop, in `claude_desktop_config.json`:
@@ -50,9 +48,9 @@ Claude Desktop, in `claude_desktop_config.json`:
 {
   "mcpServers": {
     "minecraft": {
-      "command": "node",
+      "command": "bun",
       "args": [
-        "/path/to/minecraft-mcp-server/dist/main.js",
+        "/path/to/minecraft-mcp-server/src/main.ts",
         "--host",
         "localhost",
         "--port",
@@ -121,4 +119,4 @@ Entities, chat and game state:
 
 ## Development
 
-`just` lists the recipes. `just check` runs the lint, the type check, the unit tests, the build and a start of the built server in Node, and proves a change. `just ingame <version>` runs every tool against a real server of a supported version, and the refusal check for 26.3. See [docs/verification.md](docs/verification.md). [AGENTS.md](AGENTS.md) lists the commands and the rules for this repo, and [CONTRIBUTING.md](CONTRIBUTING.md) says how a change gets in.
+`just` lists the recipes. `just check` runs the lint, the type check, the unit tests and a start of the server, and proves a change. `just ingame <version>` runs every tool against a real server of a supported version, and the refusal check for 26.3. See [docs/verification.md](docs/verification.md). [AGENTS.md](AGENTS.md) lists the commands and the rules for this repo, and [CONTRIBUTING.md](CONTRIBUTING.md) says how a change gets in.

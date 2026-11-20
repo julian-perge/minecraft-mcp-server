@@ -1,28 +1,28 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { setupStdioFiltering } from "./stdio-filter.js";
-import { log } from "./logger.js";
-import { parseConfig } from "./config.js";
-import { BotConnection } from "./bot-connection.js";
-import { ToolFactory } from "./tool-factory.js";
-import { MessageStore } from "./message-store.js";
-import { registerPositionTools } from "./tools/position-tools.js";
-import { registerInventoryTools } from "./tools/inventory-tools.js";
-import { registerBlockTools } from "./tools/block-tools.js";
-import { registerEntityTools } from "./tools/entity-tools.js";
-import { registerChatTools } from "./tools/chat-tools.js";
-import { registerFlightTools } from "./tools/flight-tools.js";
-import { registerGameStateTools } from "./tools/gamestate-tools.js";
-import { registerCraftingTools } from "./tools/crafting-tools.js";
-import { registerFurnaceTools } from "./tools/furnace-tools.js";
-import { registerVerificationTools } from "./tools/verification-tools.js";
+import { setupStdioFiltering } from "./stdio-filter.ts";
+import { log } from "./logger.ts";
+import { parseConfig } from "./config.ts";
+import { BotConnection } from "./bot-connection.ts";
+import { ToolFactory } from "./tool-factory.ts";
+import { MessageStore } from "./message-store.ts";
+import { registerPositionTools } from "./tools/position-tools.ts";
+import { registerInventoryTools } from "./tools/inventory-tools.ts";
+import { registerBlockTools } from "./tools/block-tools.ts";
+import { registerEntityTools } from "./tools/entity-tools.ts";
+import { registerChatTools } from "./tools/chat-tools.ts";
+import { registerFlightTools } from "./tools/flight-tools.ts";
+import { registerGameStateTools } from "./tools/gamestate-tools.ts";
+import { registerCraftingTools } from "./tools/crafting-tools.ts";
+import { registerFurnaceTools } from "./tools/furnace-tools.ts";
+import { registerVerificationTools } from "./tools/verification-tools.ts";
 
 setupStdioFiltering();
 
 process.on("unhandledRejection", (reason) => {
-  log("error", `Unhandled rejection: ${reason}`);
+  log("error", `Unhandled rejection: ${String(reason)}`);
 });
 
 process.on("uncaughtException", (error) => {

@@ -48,7 +48,7 @@ export function sha1Mismatch(path: string, actual: string, expected: string): st
 // A server log line looks like "[16:27:00] [Server thread/INFO]: Done (3.456s)! For help, type \"help\"", and the matchers read only the text after the first ": ". An offline server logs chat that has no signature, such as "<CheckBot> hello" or the "[Server] hello" of /say, with a "[Not Secure] " prefix, which this also removes.
 export function logMessage(line: string): string {
   const match = /^\[[^\]]*\] \[[^\]]*\]: (.*)$/.exec(line);
-  return (match ? match[1] : line).replace(/^\[Not Secure\] /, "");
+  return (match?.[1] ?? line).replace(/^\[Not Secure\] /, "");
 }
 
 export function isDoneLine(line: string): boolean {

@@ -1,8 +1,8 @@
 import { z } from "zod";
 import mineflayer from "mineflayer";
 import { Vec3 } from "vec3";
-import { ToolFactory } from "../tool-factory.js";
-import { coerceCoordinates } from "./coordinate-utils.js";
+import { ToolFactory } from "../tool-factory.ts";
+import { coerceCoordinates } from "./coordinate-utils.ts";
 
 function createCancellableFlightOperation(
   bot: mineflayer.Bot,

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { Bot } from "mineflayer";
-import { ToolFactory } from "../tool-factory.js";
+import { ToolFactory } from "../tool-factory.ts";
 
 type Entity = ReturnType<Bot["nearestEntity"]>;
 

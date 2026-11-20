@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test";
-import { MessageStore } from "../src/message-store.js";
+import { MessageStore } from "../src/message-store.ts";
 
 test("adds and retrieves messages", () => {
   const store = new MessageStore();

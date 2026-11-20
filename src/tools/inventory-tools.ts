@@ -1,6 +1,6 @@
 import { z } from "zod";
 import mineflayer from "mineflayer";
-import { ToolFactory } from "../tool-factory.js";
+import { ToolFactory } from "../tool-factory.ts";
 
 interface InventoryItem {
   name: string;

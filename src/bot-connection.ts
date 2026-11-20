@@ -1,8 +1,8 @@
 import mineflayer from "mineflayer";
 import pathfinderPkg from "mineflayer-pathfinder";
 const { pathfinder, Movements } = pathfinderPkg;
-import minecraftProtocol, { type NewPingResult, type OldPingResult } from "minecraft-protocol";
-import { checkServerVersion, supportedVersionNames } from "./minecraft-versions.js";
+import { ping, type NewPingResult, type OldPingResult } from "minecraft-protocol";
+import { checkServerVersion, supportedVersionNames } from "./minecraft-versions.ts";
 
 type ConnectionState = "connected" | "connecting" | "disconnected";
 
@@ -29,9 +29,8 @@ export interface ConnectionDeps {
   createBot: typeof mineflayer.createBot;
 }
 
-// minecraft-protocol is CommonJS, and Node cannot import its ping by name, so it comes from the default export.
 const defaultDeps: ConnectionDeps = {
-  ping: minecraftProtocol.ping,
+  ping,
   createBot: mineflayer.createBot,
 };
 

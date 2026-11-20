@@ -1,0 +1,8 @@
+{
+  // The tests index arrays and stub calls whose entries they set up themselves, so noUncheckedIndexedAccess would only add assertions there.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noUncheckedIndexedAccess": false
+  },
+  "include": ["src", "scripts", "tests"]
+}

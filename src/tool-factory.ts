@@ -1,7 +1,7 @@
 import type { McpServer, ToolCallback } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { z } from "zod";
-import type { BotConnection } from "./bot-connection.js";
+import type { BotConnection } from "./bot-connection.ts";
 
 type McpResponse = CallToolResult & {
   content: { type: "text"; text: string }[];

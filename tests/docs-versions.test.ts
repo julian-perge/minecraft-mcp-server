@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
-import { SUPPORTED_VERSIONS, UNSUPPORTED_VERSIONS } from "../src/minecraft-versions.js";
+import { SUPPORTED_VERSIONS, UNSUPPORTED_VERSIONS } from "../src/minecraft-versions.ts";
 
 const supported = SUPPORTED_VERSIONS.map((entry) => entry.version);
 const unsupported = UNSUPPORTED_VERSIONS.map((entry) => entry.version);

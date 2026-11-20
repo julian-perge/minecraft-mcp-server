@@ -1,8 +1,8 @@
 import { test, expect } from "bun:test";
-import { setupStdioFiltering } from "../src/stdio-filter.js";
+import { setupStdioFiltering } from "../src/stdio-filter.ts";
 
 test("allows JSON messages to pass through", () => {
-  const originalWrite = process.stdout.write;
+  const originalWrite = process.stdout.write.bind(process.stdout);
   let capturedOutput = "";
 
   process.stdout.write = ((chunk: string | Uint8Array) => {
@@ -21,7 +21,7 @@ test("allows JSON messages to pass through", () => {
 });
 
 test("allows timestamp log messages to pass through", () => {
-  const originalWrite = process.stdout.write;
+  const originalWrite = process.stdout.write.bind(process.stdout);
   let capturedOutput = "";
 
   process.stdout.write = ((chunk: string | Uint8Array) => {
@@ -40,7 +40,7 @@ test("allows timestamp log messages to pass through", () => {
 });
 
 test("allows newline-only messages to pass through", () => {
-  const originalWrite = process.stdout.write;
+  const originalWrite = process.stdout.write.bind(process.stdout);
   let capturedOutput = "";
 
   process.stdout.write = ((chunk: string | Uint8Array) => {
@@ -59,7 +59,7 @@ test("allows newline-only messages to pass through", () => {
 });
 
 test("filters out random debug messages", () => {
-  const originalWrite = process.stdout.write;
+  const originalWrite = process.stdout.write.bind(process.stdout);
   let capturedOutput = "";
 
   process.stdout.write = ((chunk: string | Uint8Array) => {
@@ -78,7 +78,7 @@ test("filters out random debug messages", () => {
 });
 
 test("filters minecraft-protodef library output", () => {
-  const originalWrite = process.stdout.write;
+  const originalWrite = process.stdout.write.bind(process.stdout);
   let capturedOutput = "";
 
   process.stdout.write = ((chunk: string | Uint8Array) => {
@@ -97,7 +97,7 @@ test("filters minecraft-protodef library output", () => {
 });
 
 test("allows JSON while filtering other messages", () => {
-  const originalWrite = process.stdout.write;
+  const originalWrite = process.stdout.write.bind(process.stdout);
   let capturedOutput = "";
 
   process.stdout.write = ((chunk: string | Uint8Array) => {

@@ -1,8 +1,8 @@
 import { z } from "zod";
 import mineflayer from "mineflayer";
 import minecraftData from "minecraft-data";
-import { ToolFactory } from "../tool-factory.js";
-import { log } from "../logger.js";
+import { ToolFactory } from "../tool-factory.ts";
+import { log } from "../logger.ts";
 
 interface RecipeIngredient {
   name: string;
@@ -103,8 +103,9 @@ function parseRecipeIngredientOptions(
 }
 
 function formatOptionsLabel(options: string[]): string {
-  if (options.length === 0) return "unresolved ingredient (no options found)";
-  if (options.length === 1) return options[0];
+  const [first] = options;
+  if (first === undefined) return "unresolved ingredient (no options found)";
+  if (options.length === 1) return first;
 
   const shown = options.slice(0, 3).join(", ");
   const suffix = options.length > 3 ? ", …" : "";
@@ -283,7 +284,7 @@ function collectCandidateRecipesFromBot(
   mcData: unknown,
   query: string,
   itemsById: McDataItemsById,
-  craftingTable: unknown | null,
+  craftingTable: unknown,
 ): CandidateRecipe[] {
   const data = mcData as Record<string, unknown>;
   const itemsByName = data.itemsByName as Record<string, { id?: unknown }> | undefined;
@@ -329,7 +330,7 @@ function collectCandidateRecipesFromBot(
   return partial;
 }
 
-function findNearbyCraftingTable(bot: mineflayer.Bot, mcData: unknown): unknown | null {
+function findNearbyCraftingTable(bot: mineflayer.Bot, mcData: unknown): unknown {
   const data = mcData as Record<string, unknown>;
   const blocksByName = data.blocksByName as Record<string, { id?: unknown }> | undefined;
   const craftingTableId = blocksByName?.crafting_table?.id;
@@ -423,7 +424,7 @@ export function registerCraftingTools(factory: ToolFactory, getBot: () => minefl
         const hasExact = availableRecipes.some((r) => r.exactMatch);
         if (hasExact) {
           for (let i = availableRecipes.length - 1; i >= 0; i--) {
-            if (!availableRecipes[i].exactMatch) availableRecipes.splice(i, 1);
+            if (!availableRecipes[i]?.exactMatch) availableRecipes.splice(i, 1);
           }
         }
       }

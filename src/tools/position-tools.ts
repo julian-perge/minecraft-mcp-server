@@ -3,8 +3,8 @@ import mineflayer from "mineflayer";
 import pathfinderPkg from "mineflayer-pathfinder";
 const { goals } = pathfinderPkg;
 import { Vec3 } from "vec3";
-import { ToolFactory } from "../tool-factory.js";
-import { coerceCoordinates } from "./coordinate-utils.js";
+import { ToolFactory } from "../tool-factory.ts";
+import { coerceCoordinates } from "./coordinate-utils.ts";
 
 type Direction = "forward" | "back" | "left" | "right";
 

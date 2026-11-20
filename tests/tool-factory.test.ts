@@ -1,10 +1,10 @@
 import { test, expect } from "bun:test";
 import sinon from "sinon";
 import { z } from "zod";
-import { ToolFactory } from "../src/tool-factory.js";
-import { connectTools, textOf } from "./helpers/mcp-client.js";
+import { ToolFactory } from "../src/tool-factory.ts";
+import { connectTools, textOf } from "./helpers/mcp-client.ts";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { BotConnection } from "../src/bot-connection.js";
+import type { BotConnection } from "../src/bot-connection.ts";
 
 test("createResponse returns proper MCP response format", () => {
   const mockServer = {} as McpServer;

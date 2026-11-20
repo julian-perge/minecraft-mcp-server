@@ -4,14 +4,14 @@ Work on this repo goes through GitHub issues on julian-perge/minecraft-mcp-serve
 
 ## Set up
 
-Install bun 1.4.4 or later, Node 22.12 or later, [just](https://just.systems) and [prek](https://prek.j178.dev) 0.5.0 or later. Then:
+Install bun 1.4.4 or later, [just](https://just.systems) and [prek](https://prek.j178.dev) 0.5.0 or later. Then:
 
 ```bash
 just install
 prek install
 ```
 
-`prek install` makes the hooks in `prek.toml` run on each commit: oxfmt, oxlint, `bun check`, a check for focused tests (`.only`) and the file checks.
+`prek install` makes the hooks in `prek.toml` run on each commit: oxfmt, oxlint with type information, `bun check` on the code and on the tests, a check for focused tests (`.only`) and the file checks.
 
 ## Make a change
 
@@ -25,6 +25,6 @@ Pass `--repo julian-perge/minecraft-mcp-server` to every `gh` command that write
 
 ## Try a change with a client
 
-Run `just build`, then restart your MCP client. The client config points at `dist/main.js` in your clone, as the README shows, so the client runs the new build. `just dev` builds and starts the server in the terminal, which helps when you read the logs on stderr.
+Restart your MCP client. The client config points at `src/main.ts` in your clone, as the README shows, so the client runs your change. `just dev` starts the server in the terminal, which helps when you read the logs on stderr.
 
 The [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector) calls single tools without a full client.

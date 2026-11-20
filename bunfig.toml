@@ -1,0 +1,9 @@
+# https://bun.com/docs/test/configuration
+
+[test]
+# `bun run test:cov` writes the coverage report as text to the terminal and as lcov to reports/.
+coverageReporter = ["text", "lcov"]
+coverageDir = "reports"
+coverageSkipTestFiles = true
+# The helpers in tests/helpers are test code, not code under test.
+coveragePathIgnorePatterns = ["tests/**"]

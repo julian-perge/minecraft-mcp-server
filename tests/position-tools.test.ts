@@ -1,8 +1,8 @@
 import { test, expect } from "bun:test";
 import sinon from "sinon";
-import { registerPositionTools } from "../src/tools/position-tools.js";
-import { ToolFactory } from "../src/tool-factory.js";
-import { BotConnection } from "../src/bot-connection.js";
+import { registerPositionTools } from "../src/tools/position-tools.ts";
+import { ToolFactory } from "../src/tool-factory.ts";
+import { BotConnection } from "../src/bot-connection.ts";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type mineflayer from "mineflayer";
 import { Vec3 } from "vec3";

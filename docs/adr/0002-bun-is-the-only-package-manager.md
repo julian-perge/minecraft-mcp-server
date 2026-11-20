@@ -2,7 +2,8 @@
 
 ## Status
 
-Accepted
+Accepted. ADR 0005 replaces the parts that keep the server on Node and build
+`dist/`: the server now runs on bun.
 
 ## Date
 

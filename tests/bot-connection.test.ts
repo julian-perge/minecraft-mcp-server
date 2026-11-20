@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import sinon from "sinon";
 import { EventEmitter } from "events";
-import { BotConnection, type ConnectionDeps } from "../src/bot-connection.js";
+import { BotConnection, type ConnectionDeps } from "../src/bot-connection.ts";
 
 test("constructor initializes with correct state", () => {
   const config = { host: "localhost", port: 25565, username: "TestBot" };

@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { isVersionName, sha1Hex, sha1Mismatch } from "./ingame-lib.js";
+import { isVersionName, sha1Hex, sha1Mismatch } from "./ingame-lib.ts";
 
 const MANIFEST_URL = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
 

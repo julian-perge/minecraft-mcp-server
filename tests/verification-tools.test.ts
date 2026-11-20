@@ -6,9 +6,9 @@ import { join } from "node:path";
 import type mineflayer from "mineflayer";
 import sinon from "sinon";
 import { Vec3 } from "vec3";
-import { registerVerificationTools } from "../src/tools/verification-tools.js";
-import { connectTools, textOf } from "./helpers/mcp-client.js";
-import { structureNbt } from "../scripts/structure-nbt.js";
+import { registerVerificationTools } from "../src/tools/verification-tools.ts";
+import { connectTools, textOf } from "./helpers/mcp-client.ts";
+import { structureNbt } from "../scripts/structure-nbt.ts";
 
 function blockWorld(
   blocks: Record<string, { name: string; properties?: Record<string, unknown> }>,

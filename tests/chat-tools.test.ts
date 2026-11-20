@@ -1,10 +1,10 @@
 import { test, expect } from "bun:test";
 import sinon from "sinon";
-import { registerChatTools } from "../src/tools/chat-tools.js";
-import { ToolFactory } from "../src/tool-factory.js";
-import { MessageStore } from "../src/message-store.js";
+import { registerChatTools } from "../src/tools/chat-tools.ts";
+import { ToolFactory } from "../src/tool-factory.ts";
+import { MessageStore } from "../src/message-store.ts";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { BotConnection } from "../src/bot-connection.js";
+import type { BotConnection } from "../src/bot-connection.ts";
 import type mineflayer from "mineflayer";
 
 test("registerChatTools registers send-chat tool", () => {

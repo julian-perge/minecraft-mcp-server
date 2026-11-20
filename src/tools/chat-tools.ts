@@ -1,7 +1,7 @@
 import { z } from "zod";
 import mineflayer from "mineflayer";
-import { ToolFactory } from "../tool-factory.js";
-import { MessageStore } from "../message-store.js";
+import { ToolFactory } from "../tool-factory.ts";
+import { MessageStore } from "../message-store.ts";
 
 export function registerChatTools(
   factory: ToolFactory,

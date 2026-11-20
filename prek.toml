@@ -8,9 +8,9 @@ hooks = [
   { id = "check-case-conflict" },
   { id = "check-merge-conflict" },
   { id = "check-executables-have-shebangs" },
-  # src/main.ts keeps its shebang so that tsc copies it into dist/main.js, the file that runs. The source file itself never runs.
-  { id = "check-shebang-scripts-are-executable", exclude = '^src/main\.ts$' },
-  { id = "check-json" },
+  { id = "check-shebang-scripts-are-executable" },
+  # tsconfig files are JSON with comments, which TypeScript and bun read, and check-json refuses.
+  { id = "check-json", exclude = '^tsconfig(\.[a-z]+)?\.json$' },
   { id = "check-yaml" },
   { id = "detect-private-key" },
   { id = "end-of-file-fixer" },
@@ -19,7 +19,7 @@ hooks = [
   { id = "trailing-whitespace", args = ["--markdown-linebreak-ext=md"] },
 ]
 
-# oxfmt and oxlint run from the versions that package.json pins, as in ~/code/julianperge_profile. The type check is bun's own checker, so it runs on the installed bun.
+# oxfmt and oxlint run from the versions that package.json pins, as in ~/code/julianperge_profile. The type check is bun's own checker, so it runs on the installed bun. It checks tsconfig.json, then tsconfig.test.json, which adds the tests.
 [[repos]]
 repo = "local"
 
@@ -33,14 +33,14 @@ types_or = ["ts", "json"]
 [[repos.hooks]]
 id = "oxlint"
 name = "oxlint"
-entry = "bun x oxlint --deny-warnings"
+entry = "bun x oxlint --type-aware --deny-warnings"
 language = "system"
 types = ["ts"]
 
 [[repos.hooks]]
 id = "bun-check"
 name = "bun check (types)"
-entry = "bun check"
+entry = "bun run check:types"
 language = "system"
 types = ["ts"]
 pass_filenames = false

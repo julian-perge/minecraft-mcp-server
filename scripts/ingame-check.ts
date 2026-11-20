@@ -1,5 +1,5 @@
 import { type ChildProcessWithoutNullStreams, spawn, spawnSync } from "node:child_process";
-import { createWriteStream, existsSync, readFileSync } from "node:fs";
+import { createWriteStream, readFileSync } from "node:fs";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
@@ -20,10 +20,10 @@ import {
   logMessage,
   parseJavaMajor,
   serverProperties,
-} from "./ingame-lib.js";
-import { structureNbt } from "./structure-nbt.js";
-import { supportedVersionNames, UNSUPPORTED_VERSIONS } from "../src/minecraft-versions.js";
-import { resolveServerJar } from "./server-jar.js";
+} from "./ingame-lib.ts";
+import { structureNbt } from "./structure-nbt.ts";
+import { supportedVersionNames, UNSUPPORTED_VERSIONS } from "../src/minecraft-versions.ts";
+import { resolveServerJar } from "./server-jar.ts";
 
 const USERNAME = "CheckBot";
 const REPO_ROOT = join(import.meta.dir, "..");
@@ -52,8 +52,8 @@ function parseCli() {
       report: { type: "string" },
     },
   });
-  if (positionals.length !== 1) throw new Error(usage);
-  const version = positionals[0];
+  const [version] = positionals;
+  if (positionals.length !== 1 || version === undefined) throw new Error(usage);
   // A version on the unsupported list can only pass the refusal check, so `just ingame 26.3` runs that check without the flag.
   const expectRefusal =
     values["expect-refusal"] || UNSUPPORTED_VERSIONS.some((entry) => entry.version === version);
@@ -122,7 +122,7 @@ class MinecraftServer {
         timeoutMs,
       );
       this.listeners.add(listener);
-      this.exited.then(() => done(new Error(`the server exited while waiting for ${what}`)));
+      void this.exited.then(() => done(new Error(`the server exited while waiting for ${what}`)));
     });
     wait.catch(() => {});
     return wait;
@@ -194,7 +194,7 @@ function pickJava(version: string, needed: number): string {
       `Minecraft ${version} needs Java ${needed} or newer, but ${java} is Java ${major}. Set ${envName} to a Java ${needed} home.`,
     );
   }
-  javaVersionText = output.split("\n")[0].trim();
+  javaVersionText = (output.split("\n")[0] ?? "").trim();
   return java;
 }
 
@@ -238,7 +238,7 @@ function textOf(result: CallToolResult): string {
 }
 
 function firstLine(text: string): string {
-  const line = text.trim().split("\n")[0];
+  const line = text.trim().split("\n")[0] ?? "";
   return line.length > 100 ? `${line.slice(0, 97)}...` : line;
 }
 
@@ -642,9 +642,6 @@ async function runChecks(checks: Check[]): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  const distMain = join(REPO_ROOT, "dist", "main.js");
-  if (!existsSync(distMain)) throw new Error(`${distMain} is missing. Run just build first.`);
-
   const jar = await resolveServerJar(args.version);
   const java = pickJava(args.version, jar.javaMajor);
   const port = await freePort();
@@ -663,8 +660,17 @@ async function main(): Promise<void> {
 
   const mcpLogFile = createWriteStream(join(tempDir, "mcp-server.log"));
   const transport = new StdioClientTransport({
-    command: "node",
-    args: [distMain, "--host", "127.0.0.1", "--port", String(port), "--username", USERNAME],
+    // The server runs on the same bun as this check, so the bun version in the report is the one the server ran on.
+    command: process.execPath,
+    args: [
+      join(REPO_ROOT, "src", "main.ts"),
+      "--host",
+      "127.0.0.1",
+      "--port",
+      String(port),
+      "--username",
+      USERNAME,
+    ],
     cwd: REPO_ROOT,
     stderr: "pipe",
   });
@@ -767,13 +773,12 @@ if (args.report) {
   const mineflayer = JSON.parse(
     readFileSync(join(REPO_ROOT, "node_modules", "mineflayer", "package.json"), "utf8"),
   ) as { version: string };
-  const node = spawnSync("node", ["--version"], { encoding: "utf8" }).stdout.trim();
   const report = {
     version: args.version,
     date: new Date().toISOString(),
     mode: args["expect-refusal"] ? "refusal" : "game",
     mineflayer: mineflayer.version,
-    node,
+    bun: Bun.version,
     java: javaVersionText,
     passed,
     checks: results,

@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test";
-import { parseConfig } from "../src/config.js";
+import { parseConfig } from "../src/config.ts";
 
 test("parseConfig returns default values", () => {
   const originalArgv = process.argv;

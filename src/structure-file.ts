@@ -115,7 +115,7 @@ export async function parseStructure(
     if (name === "minecraft:structure_void") {
       continue;
     }
-    const properties = entry.Properties ?? entry.properties;
+    const properties = entry?.Properties ?? entry?.properties;
     const [x, y, z] = block.pos;
     blocks.push(properties ? { x, y, z, name, properties } : { x, y, z, name });
   }

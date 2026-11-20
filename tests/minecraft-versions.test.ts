@@ -7,7 +7,7 @@ import {
   SUPPORTED_VERSIONS,
   supportedVersionNames,
   UNSUPPORTED_VERSIONS,
-} from "../src/minecraft-versions.js";
+} from "../src/minecraft-versions.ts";
 
 // The minecraft-data release that ships a version's data is the one that the bot joins with, so these tests tie the list to the installed dependencies.
 describe.each(SUPPORTED_VERSIONS.map((entry) => [entry.version, entry.protocol] as const))(

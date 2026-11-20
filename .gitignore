@@ -5,8 +5,9 @@ Thumbs.db
 # Node
 node_modules/
 
-# Build output
+# Build output from before the server ran on bun, and the coverage report of `bun run test:cov`
 dist/
+reports/
 
 # Editor
 .vscode/

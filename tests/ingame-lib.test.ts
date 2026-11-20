@@ -13,7 +13,7 @@ import {
   serverProperties,
   sha1Hex,
   sha1Mismatch,
-} from "../scripts/ingame-lib.js";
+} from "../scripts/ingame-lib.ts";
 
 describe("serverProperties", () => {
   const lines = serverProperties(25599).trimEnd().split("\n");

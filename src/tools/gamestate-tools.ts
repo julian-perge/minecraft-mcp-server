@@ -1,5 +1,5 @@
 import mineflayer from "mineflayer";
-import { ToolFactory } from "../tool-factory.js";
+import { ToolFactory } from "../tool-factory.ts";
 
 export function registerGameStateTools(factory: ToolFactory, getBot: () => mineflayer.Bot): void {
   factory.registerTool("detect-gamemode", "Detect the gamemode on game", {}, async () => {

@@ -1,8 +1,8 @@
 import { test, expect } from "bun:test";
-import { log } from "../src/logger.js";
+import { log } from "../src/logger.ts";
 
 test("log writes to stderr", () => {
-  const originalWrite = process.stderr.write;
+  const originalWrite = process.stderr.write.bind(process.stderr);
   let capturedOutput = "";
 
   process.stderr.write = ((chunk: string | Uint8Array) => {
@@ -19,7 +19,7 @@ test("log writes to stderr", () => {
 });
 
 test("log format includes all required components", () => {
-  const originalWrite = process.stderr.write;
+  const originalWrite = process.stderr.write.bind(process.stderr);
   let capturedOutput = "";
 
   process.stderr.write = ((chunk: string | Uint8Array) => {
@@ -39,7 +39,7 @@ test("log format includes all required components", () => {
 });
 
 test("log includes ISO timestamp", () => {
-  const originalWrite = process.stderr.write;
+  const originalWrite = process.stderr.write.bind(process.stderr);
   let capturedOutput = "";
 
   process.stderr.write = ((chunk: string | Uint8Array) => {
@@ -63,7 +63,7 @@ test("log includes ISO timestamp", () => {
 });
 
 test("log handles different log levels", () => {
-  const originalWrite = process.stderr.write;
+  const originalWrite = process.stderr.write.bind(process.stderr);
   const outputs: string[] = [];
 
   process.stderr.write = ((chunk: string | Uint8Array) => {
@@ -86,7 +86,7 @@ test("log handles different log levels", () => {
 });
 
 test("log handles empty message", () => {
-  const originalWrite = process.stderr.write;
+  const originalWrite = process.stderr.write.bind(process.stderr);
   let capturedOutput = "";
 
   process.stderr.write = ((chunk: string | Uint8Array) => {
@@ -104,7 +104,7 @@ test("log handles empty message", () => {
 });
 
 test("log handles special characters in message", () => {
-  const originalWrite = process.stderr.write;
+  const originalWrite = process.stderr.write.bind(process.stderr);
   let capturedOutput = "";
 
   process.stderr.write = ((chunk: string | Uint8Array) => {
@@ -123,7 +123,7 @@ test("log handles special characters in message", () => {
 });
 
 test("log handles multiline message", () => {
-  const originalWrite = process.stderr.write;
+  const originalWrite = process.stderr.write.bind(process.stderr);
   let capturedOutput = "";
 
   process.stderr.write = ((chunk: string | Uint8Array) => {
@@ -141,7 +141,7 @@ test("log handles multiline message", () => {
 });
 
 test("log output format is consistent", () => {
-  const originalWrite = process.stderr.write;
+  const originalWrite = process.stderr.write.bind(process.stderr);
   let capturedOutput = "";
 
   process.stderr.write = ((chunk: string | Uint8Array) => {

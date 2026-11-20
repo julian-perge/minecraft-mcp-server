@@ -2,8 +2,8 @@ import { z } from "zod";
 import mineflayer from "mineflayer";
 import type { Item } from "prismarine-item";
 import { Vec3 } from "vec3";
-import { ToolFactory } from "../tool-factory.js";
-import { coerceCoordinates } from "./coordinate-utils.js";
+import { ToolFactory } from "../tool-factory.ts";
+import { coerceCoordinates } from "./coordinate-utils.ts";
 
 const FURNACE_BLOCKS = new Set(["furnace", "blast_furnace", "smoker"]);
 
@@ -93,7 +93,7 @@ export function registerFurnaceTools(factory: ToolFactory, getBot: () => minefla
       const furnace = await bot.openFurnace(furnaceBlock);
       const cleanup = () => {
         try {
-          furnace.close();
+          void furnace.close();
         } catch {}
       };
 

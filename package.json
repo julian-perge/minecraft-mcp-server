@@ -2,17 +2,15 @@
   "name": "minecraft-mcp-server",
   "version": "2.0.4",
   "bin": {
-    "minecraft-mcp-server": "dist/main.js"
+    "minecraft-mcp-server": "src/main.ts"
   },
   "type": "module",
-  "main": "dist/main.js",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "start": "node dist/main.js",
-    "dev": "tsc -p tsconfig.build.json && node dist/main.js",
+    "start": "bun src/main.ts",
     "test": "bun test",
-    "check:types": "bun check",
-    "lint": "oxlint --deny-warnings"
+    "test:cov": "bun test --coverage",
+    "check:types": "bun check && bun check -p tsconfig.test.json",
+    "lint": "oxlint --type-aware --deny-warnings"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
@@ -27,16 +25,16 @@
   },
   "devDependencies": {
     "@types/bun": "1.4.4",
-    "@types/node": "26.6.6",
     "@types/sinon": "22.0.2",
     "@types/yargs": "17.0.35",
     "oxfmt": "0.79.0",
     "oxlint": "1.94.0",
+    "oxlint-tsgolint": "7.0.2007",
     "sinon": "22.1.0",
     "typescript": "7.0.2"
   },
   "engines": {
-    "node": ">=22.12"
+    "bun": ">=1.4.4"
   },
   "packageManager": "bun@1.4.4"
 }

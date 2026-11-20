@@ -8,9 +8,9 @@ import {
   formatReport,
   type ExpectedBlock,
   type WorldHeight,
-} from "../block-compare.js";
-import { readStructureFile } from "../structure-file.js";
-import type { ToolFactory } from "../tool-factory.js";
+} from "../block-compare.ts";
+import { readStructureFile } from "../structure-file.ts";
+import type { ToolFactory } from "../tool-factory.ts";
 
 const { goals } = pathfinderPkg;
 
@@ -59,7 +59,7 @@ export function registerVerificationTools(
         // The server disconnects a player that sends a control character or a section sign, so the tool refuses them before it sends anything.
         .refine(
           (command) =>
-            ![...command].some((character) => {
+            !command.split("").some((character) => {
               const code = character.charCodeAt(0);
               return code < 0x20 || code === 0x7f || code === 0xa7;
             }),

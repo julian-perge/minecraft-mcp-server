@@ -4,9 +4,9 @@ import pathfinderPkg from "mineflayer-pathfinder";
 const { goals } = pathfinderPkg;
 import { Vec3 } from "vec3";
 import minecraftData from "minecraft-data";
-import { ToolFactory } from "../tool-factory.js";
-import { log } from "../logger.js";
-import { coerceCoordinates } from "./coordinate-utils.js";
+import { ToolFactory } from "../tool-factory.ts";
+import { log } from "../logger.ts";
+import { coerceCoordinates } from "./coordinate-utils.ts";
 
 type FaceDirection = "up" | "down" | "north" | "south" | "east" | "west";
 const MAX_FIND_BLOCKS_COUNT = 256;
@@ -73,7 +73,8 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
       if (faceDirection !== "down") {
         const specificFace = possibleFaces.find((face) => face.direction === faceDirection);
         if (specificFace) {
-          possibleFaces.unshift(possibleFaces.splice(possibleFaces.indexOf(specificFace), 1)[0]);
+          possibleFaces.splice(possibleFaces.indexOf(specificFace), 1);
+          possibleFaces.unshift(specificFace);
         }
       }
 
@@ -95,7 +96,7 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
               `Placed block at (${x}, ${y}, ${z}) using ${face.direction} face`,
             );
           } catch (placeError) {
-            log("warn", `Failed to place using ${face.direction} face: ${placeError}`);
+            log("warn", `Failed to place using ${face.direction} face: ${String(placeError)}`);
             continue;
           }
         }

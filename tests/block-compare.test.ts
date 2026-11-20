@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import type { Vec3 } from "vec3";
-import { compareBlocks, formatReport, type WorldBlock } from "../src/block-compare.js";
+import { compareBlocks, formatReport, type WorldBlock } from "../src/block-compare.ts";
 
 function world(blocks: Record<string, WorldBlock>) {
   return (position: Vec3) => blocks[`${position.x},${position.y},${position.z}`] ?? null;
